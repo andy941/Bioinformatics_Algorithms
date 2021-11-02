@@ -1,4 +1,4 @@
-#include "../../lib/Tools.h"
+#include "Tools.h"
 #include <iostream>
 using namespace std;
 
