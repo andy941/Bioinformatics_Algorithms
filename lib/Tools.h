@@ -1,4 +1,11 @@
-#include<string>
+#include <chrono>
+#include <string>
+#include <vector>
+
+// Define some useful ANSI colors
+#define RED	"\033[31m"
+#define RESET "\033[0m"
+
 std::string random_seq(size_t, char);
 
 class Timer {
@@ -10,4 +17,3 @@ public:
   Timer() = default;
   ~Timer();
 };
-
