@@ -6,25 +6,27 @@
 
 using namespace std;
 
-string::iterator naive_find(string &str, string &pattern) {
-  if (pattern == "")
+auto naive_find(const string &str, const string &pattern) {
+  if (pattern == "" || str == "")
     return str.end();
-  long long int count = 0;
-  char c = pattern[0];
-  for (string::iterator x = str.begin(); x != str.end(); advance(x, 1)) {
-    if (*x == c) {
-      count += 1;
-    } else
-      count = 0;
-    if (count == pattern.size())
-      return x;
+
+  auto p = pattern.begin();
+  for (auto x = str.begin(); x != str.end(); advance(x, 1)) {
+    auto tmp = x;
+    while (*tmp == *p) {
+      if (p + 1 == pattern.end())
+        return x;
+      advance(p, 1);
+      advance(tmp, 1);
+    }
+    p = pattern.begin();
   }
   return str.end();
 }
 
 int main() {
-  string seq = random_seq(100, 'D');
-  string pattern{"TGG"};
+  const string seq = random_seq(100, 'D');
+  const string pattern{"TGG"};
   cout << "pattern: " << pattern << endl;
   cout << "sequence: " << seq << endl;
 
@@ -34,7 +36,7 @@ int main() {
     return 0;
   }
   cout << "\n--\nsequence: ";
-  cout << string(seq.begin(), p - 1);
+  cout << string(seq.begin(), p);
   cout << RED << pattern << RESET;
   cout << string(p + pattern.size(), seq.end()) << endl;
   cout << "Found!\n";
