@@ -7,6 +7,13 @@
 
 using namespace std;
 
+Timer::~Timer() {
+  auto end = std::chrono::high_resolution_clock::now();
+  auto elapsed =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+  printf("Time: \t%.10f seconds.\n", elapsed.count() * 1e-9);
+}
+
 string random_seq(size_t n, char kind) {
   string result;
   string space;
@@ -33,9 +40,22 @@ string random_seq(size_t n, char kind) {
   return result;
 }
 
-Timer::~Timer() {
-  auto end = std::chrono::high_resolution_clock::now();
-  auto elapsed =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-  printf("Time: \t%.10f seconds.\n", elapsed.count() * 1e-9);
+void print_pattern_hits(const string &seq, const string &pattern,
+                        vector<string::const_iterator> &hits) {
+  auto beg = seq.begin();
+  auto end = seq.end();
+  for (auto x : hits) {
+    cout << string(beg, x);
+    cout << RED << pattern << RESET;
+    beg = x;
+    advance(beg, pattern.size());
+  }
+  cout << string(beg, end) << endl;
+}
+
+void print_pattern_hits(const string &seq, const string &pattern,
+                        string::const_iterator &hit) {
+  cout << string(seq.begin(), hit);
+  cout << RED << pattern << RESET;
+  cout << string(hit + pattern.size(), seq.end()) << endl;
 }
