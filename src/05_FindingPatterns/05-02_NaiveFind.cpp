@@ -7,6 +7,7 @@
 using namespace std;
 
 auto naive_find(const string &str, const string &pattern) {
+  Timer t;
   if (pattern.begin() == pattern.end() || str.begin() == str.end())
     return str.end();
 
@@ -25,6 +26,7 @@ auto naive_find(const string &str, const string &pattern) {
 }
 
 auto naive_find_all(const string &str, const string &pattern) {
+  Timer t;
   vector<string::const_iterator> res;
   if (pattern.begin() == pattern.end() || str.begin() == str.end()) {
     res.push_back(str.end());
@@ -47,10 +49,10 @@ auto naive_find_all(const string &str, const string &pattern) {
 }
 
 int main() {
-  const string seq = random_seq(80, 'D');
-  const string pattern{"GA"};
-  cout << "pattern :\t" << pattern << endl;
-  cout << "sequence:\t" << seq << endl;
+  const string seq = random_seq(1e9, 'D');
+  const string pattern{"GATCC"};
+  // cout << "pattern :\t" << pattern << endl;
+  // cout << "sequence:\t" << seq << endl;
 
   auto p = naive_find(seq, pattern);
 
@@ -60,8 +62,12 @@ int main() {
   }
 
   cout << "first   :\t";
-  print_pattern_hits(seq, pattern, p);
+  if (p == seq.end())
+    cout << "Not Found!" << endl;
+  else
+    cout << "Found!" << endl;
+  // print_pattern_hits(seq, pattern, p);
   auto pa = naive_find_all(seq, pattern);
-  cout << "all     :\t";
-  print_pattern_hits(seq, pattern, pa);
+  cout << "hits     :\t" << pa.size() << endl;
+  // print_pattern_hits(seq, pattern, pa);
 }

@@ -1,4 +1,5 @@
 #include "Tools.h"
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <iterator>
@@ -15,8 +16,10 @@ class BoyerMoore {
   vector<int> f;
   vector<int> s;
 
+public:
   void preprocess_bcr();
   void preprocess_gsr();
+  auto find_all(const string &text);
 
 public:
   BoyerMoore(string alphabet, string pattern);
@@ -25,8 +28,6 @@ public:
 BoyerMoore::BoyerMoore(string alphabet, string pattern)
     : alphabet{alphabet}, pattern{pattern} {
   preprocess_bcr();
-  // for (auto x : occ)
-  //  cout << x.first << " " << x.second << endl;
   preprocess_gsr();
 };
 
@@ -41,43 +42,62 @@ void BoyerMoore::preprocess_gsr() {
   f = vector<int>(pattern.length() + 1, 0);
   s = vector<int>(pattern.length() + 1, 0);
   int i = pattern.length();
-  int j = pattern.length();
+  int j = pattern.length() + 1;
   f[i] = j;
   while (i > 0) {
+    while (j <= pattern.length() && pattern[i - 1] != pattern[j - 1]) {
+      if (s[j] == 0)
+        s[j] = j - 1;
+      j = f[j];
+    }
+    --i;
+    --j;
+    f[i] = j;
+  }
+  j = f[0];
+  for (int i = 0; i < pattern.length(); i++) {
+    if (s[i] == 0)
+      s[i] = j;
+    if (i == j)
+      j = f[j];
   }
 }
 
-auto naive_find_all(const string &str, const string &pattern) {
+auto BoyerMoore::find_all(const string &text) {
+
+  Timer t;
   vector<string::const_iterator> res;
-  if (pattern.begin() == pattern.end() || str.begin() == str.end()) {
-    res.push_back(str.end());
-    return res;
-  }
-  auto p = pattern.begin();
-  for (auto x = str.begin(); x != str.end(); advance(x, 1)) {
-    auto tmp = x;
-    while (*tmp == *p) {
-      if (p + 1 == pattern.end()) {
-        res.push_back(x);
-        break;
-      }
-      advance(p, 1);
-      advance(tmp, 1);
+  int i = 0;
+  int j = pattern.length() - 1;
+  char c;
+
+  while (i <= text.length() - pattern.length()) {
+
+    j = pattern.length() - 1;
+    while (j >= 0 && pattern[j] == text[j + i]) {
+      --j;
     }
-    p = pattern.begin();
+    if (j < 0) {
+      res.push_back(text.begin() + i);
+      i += s[0];
+    } else {
+      c = text[j + i];
+      i += max(s[j + 1], j - occ[c]);
+    }
   }
   return res;
 }
 
 int main() {
-  const string seq = random_seq(80, 'D');
-  const string pattern{"GA"};
-  cout << "pattern :\t" << pattern << endl;
-  cout << "sequence:\t" << seq << endl;
+  const string seq = random_seq(1e9, 'D');
+  const string pattern{"GATCC"};
+  // cout << "pattern :\t" << pattern << endl;
+  // cout << "sequence:\t" << seq << endl;
 
-  auto pa = naive_find_all(seq, pattern);
-  cout << "all     :\t";
-  print_pattern_hits(seq, pattern, pa);
+  BoyerMoore bm{"ATCG", pattern};
+  auto pa = bm.find_all(seq);
 
-  BoyerMoore("ACGT", pattern);
+  cout << "hits     :\t" << pa.size() << endl;
+  // cout << "hits    :\t";
+  //  print_pattern_hits(seq, pattern, pa);
 }
