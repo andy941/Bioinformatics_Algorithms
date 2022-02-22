@@ -8,7 +8,7 @@
 
 using namespace std;
 
-class BoyerMoore {
+class DFA {
 
   string alphabet;
   string pattern;
@@ -22,23 +22,23 @@ public:
   auto find_all(const string &text);
 
 public:
-  BoyerMoore(string alphabet, string pattern);
+  DFA(string alphabet, string pattern);
 };
 
-BoyerMoore::BoyerMoore(string alphabet, string pattern)
+DFA::DFA(string alphabet, string pattern)
     : alphabet{alphabet}, pattern{pattern} {
   preprocess_bcr();
   preprocess_gsr();
 };
 
-void BoyerMoore::preprocess_bcr() {
+void DFA::preprocess_bcr() {
   for (char s : alphabet)
     occ[s] = -1;
   for (int i = 0; i < pattern.length(); i++)
     occ[pattern[i]] = i;
 }
 
-void BoyerMoore::preprocess_gsr() {
+void DFA::preprocess_gsr() {
   f = vector<int>(pattern.length() + 1, 0);
   s = vector<int>(pattern.length() + 1, 0);
   int i = pattern.length();
@@ -63,7 +63,7 @@ void BoyerMoore::preprocess_gsr() {
   }
 }
 
-auto BoyerMoore::find_all(const string &text) {
+auto DFA::find_all(const string &text) {
 
   Timer t;
   vector<string::const_iterator> res;
@@ -94,7 +94,7 @@ int main() {
   // cout << "pattern :\t" << pattern << endl;
   // cout << "sequence:\t" << seq << endl;
 
-  BoyerMoore bm{"ATCG", pattern};
+  DFA bm{"ATCG", pattern};
   auto pa = bm.find_all(seq);
 
   cout << "hits     :\t" << pa.size() << endl;

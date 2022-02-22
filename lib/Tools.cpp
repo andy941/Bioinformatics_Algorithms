@@ -35,6 +35,7 @@ string random_seq(size_t n, char kind) {
   }
   sz = space.length();
 
+  srand(33);
   for (auto i = 0; i < n; i++)
     result.push_back(space[rand() % sz]);
   return result;
