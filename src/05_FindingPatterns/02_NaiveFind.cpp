@@ -53,6 +53,7 @@ int main() {
   const string pattern{"GATCC"};
   // cout << "pattern :\t" << pattern << endl;
   // cout << "sequence:\t" << seq << endl;
+  const string seq2{"AGTCCGATGGAGAAATG"};
 
   auto p = naive_find(seq, pattern);
 
