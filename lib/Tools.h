@@ -22,3 +22,6 @@ void print_pattern_hits(const std::string &, const std::string &,
                         std::string::const_iterator &);
 void print_pattern_hits(const std::string &, const std::string &,
                         std::vector<std::string::const_iterator> &);
+
+template <typename T>
+void print_matrix(std::string &rownames, std::string &colnames, T *mat);

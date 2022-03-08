@@ -18,9 +18,9 @@ int main() {
   unordered_map<string, int> submat_blosum = read_submat("./data/BLOSUM62.csv");
   cout << "BLOSUM62: " << submat_blosum.size() << " entries." << endl;
 
-  const string d1{"-CAGTGCATG-ACATA"}; //
+  const string d1{"-CAGTGCATG-ACATA"};
   const string d2{"TCAG-GC-TCTACATA"};
-  int dna_score = score_align(d1, d2, submat, -3);
+  int dna_score = score_align(d1, d2, submat, -3); // = -8
   cout << endl;
   cout << "Score DNA ------------------------------------------" << endl;
   cout << endl;

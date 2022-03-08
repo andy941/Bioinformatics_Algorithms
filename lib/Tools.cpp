@@ -60,3 +60,20 @@ void print_pattern_hits(const string &seq, const string &pattern,
   cout << RED << pattern << RESET;
   cout << string(hit + pattern.size(), seq.end()) << endl;
 }
+
+template <class T>
+void print_matrix(std::string &rownames, std::string &colnames, T *mat) {
+  int dim1 = rownames.size();
+  int dim2 = colnames.size();
+
+  std::cout << ' ';
+  for (int i = 0; i < dim2; i++)
+    std::cout << ' ' << colnames[i];
+  std::cout << std::endl;
+  for (int i = 0; i < dim1; i++) {
+    std::cout << rownames[i];
+    for (int j = 0; j < dim2; j++)
+      std::cout << ' ' << mat[i + j * dim1];
+    std::cout << std::endl;
+  }
+};

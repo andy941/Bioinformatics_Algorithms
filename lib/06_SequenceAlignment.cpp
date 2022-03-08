@@ -1,4 +1,5 @@
 #include "06_SequenceAlignment.h"
+#include "Tools.h"
 #include <ctype.h>
 #include <fstream>
 #include <iostream>
@@ -6,6 +7,7 @@
 #include <sstream>
 #include <vector>
 
+// 03 Objective function
 std::unordered_map<std::string, int>
 create_submat(const int &match, const int &mismatch,
               const std::string &alphabet) {
@@ -107,3 +109,72 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
   }
   return res;
 }
+
+// 04 NeedleMan-Wunsch
+int max3t(const int &a, const int &b, const int &c) {
+  if (a > b && a > c)
+    return a;
+  if (b > a && b > c)
+    return b;
+  return c;
+};
+
+void alignment::print() {
+  std::cout << "seq1: " << a << std::endl;
+  std::cout << "seq2: " << b << std::endl;
+};
+
+void alignment::add(const char &ac, const char &bc) {
+  a.push_back(ac);
+  b.push_back(bc);
+}
+
+needleman_Wunsch::needleman_Wunsch(const int &match, const int &mismatch,
+                                   const std::string &alphabet) {
+  sm = create_submat(match, mismatch, alphabet);
+};
+
+needleman_Wunsch::needleman_Wunsch(const std::string &file) {
+
+  sm = read_submat(file);
+};
+
+needleman_Wunsch::~needleman_Wunsch() {
+  delete[] S;
+  delete[] T;
+  S = nullptr;
+  T = nullptr;
+};
+
+void needleman_Wunsch::align_sequences(const std::string &s1,
+                                       const std::string &s2){};
+
+void needleman_Wunsch::recover_alignment(){};
+
+void needleman_Wunsch::reset() {
+  s1 = "";
+  s2 = "";
+  delete[] S;
+  delete[] T;
+  S = nullptr;
+  T = nullptr;
+  dim1 = 0;
+  dim2 = 0;
+  aln = alignment();
+};
+
+void needleman_Wunsch::print() {
+  std::string gap_s1 = '-' + s1;
+  std::string gap_s2 = '-' + s2;
+  std::cout << "gap_sequences" << std::endl;
+  std::cout << "seq1: " << s1 << std::endl;
+  std::cout << "seq2: " << s2 << std::endl;
+  std::cout << "Alignment" << std::endl;
+  aln.print();
+  std::cout << "S matrix" << std::endl;
+  if (S != nullptr)
+    print_matrix(gap_s1, gap_s2, S);
+  std::cout << "T matrix" << std::endl;
+  if (T != nullptr)
+    print_matrix(gap_s1, gap_s2, T);
+};
