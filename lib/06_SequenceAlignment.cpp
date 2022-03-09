@@ -132,6 +132,10 @@ void alignment::add(const char &ac, const char &bc) {
   b.push_back(bc);
 }
 
+void alignment::flip() {
+  reverse(a.begin(), a.end());
+  reverse(b.begin(), b.end());
+}
 needleman_Wunsch::needleman_Wunsch(const int &match, const int &mismatch,
                                    const std::string &alphabet) {
   sm = create_submat(match, mismatch, alphabet);
@@ -159,10 +163,14 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
 
+  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
+  // bottom left.
+
   // Gap row
   int cost = 0;
   for (int i = 0; i < dim2; i++) {
     S[i] = cost;
+    T[i] = 1;
     cost += gap_cost;
   }
 
@@ -170,8 +178,11 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
   cost = 0;
   for (int i = 0; i < dim1; i++) {
     S[i * dim2] = cost;
+    T[i * dim2] = 2;
     cost += gap_cost;
   }
+
+  T[0] = 0; // top right has to be 0;
 
   // calculate the recursive costs for each cell of S and record the best path
   // choices in T.
@@ -181,13 +192,10 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
       std::array<int, 3> arr;
       arr[0] =
           S[pos - j - i * dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
-      arr[1] = S[pos - j] + gap_cost;
-      arr[2] = S[pos - i * dim2] + gap_cost;
+      arr[1] = S[pos - 1] + gap_cost;
+      arr[2] = S[pos - dim2] + gap_cost;
       int max = max3t(arr);
 
-      for (auto &x : arr)
-        std::cout << x;
-      std::cout << std::endl;
       S[pos] = arr[max];
       T[pos] = max;
     }
@@ -195,7 +203,33 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
 };
 
 // walk T from bottom right corner and reconstruct the alignment
-void needleman_Wunsch::trace_back(){};
+void needleman_Wunsch::trace_back() {
+  unsigned int px = dim2;
+  unsigned int py = dim1;
+  while (px != 0 || py != 0) {
+    std::cout << px << ' ' << py << std::endl;
+    switch (T[px + py * dim2]) {
+    case 0:
+      aln.add(s1[py - 1], s2[px - 1]);
+      px--;
+      py--;
+      break;
+    case 1:
+      aln.add('-', s2[px - 1]);
+      px--;
+      break;
+    case 2:
+      aln.add(s1[py - 1], '-');
+      py--;
+      break;
+    default:
+      std::cerr << "error tracing back the optimal alignment, check T matrix."
+                << std::endl;
+      throw 1;
+    }
+  }
+  aln.flip();
+};
 
 void needleman_Wunsch::reset() {
   s1 = "";

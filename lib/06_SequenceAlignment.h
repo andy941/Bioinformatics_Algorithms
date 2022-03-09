@@ -23,15 +23,15 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
 // 04 NeedleMan-Wunsch
 int max3t(const std::array<int, 3> arr);
 
-class alignment {
+struct alignment {
   std::string a;
   std::string b;
 
-public:
   alignment() = default;
   alignment(const std::string s1, const std::string s2) : a{s1}, b{s2} {};
   void print();
   void add(const char &ac, const char &bc);
+	void flip();
 };
 
 class needleman_Wunsch {
@@ -42,9 +42,9 @@ class needleman_Wunsch {
   int dim1{0};
   int dim2{0};
   std::unordered_map<std::string, int> sm;
-  alignment aln;
 
 public:
+  alignment aln;
   needleman_Wunsch() = delete;
   ~needleman_Wunsch();
   needleman_Wunsch(const int &match, const int &mismatch,
