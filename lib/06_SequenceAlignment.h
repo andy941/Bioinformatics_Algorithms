@@ -21,7 +21,7 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
                        const int &gap_cost, const int &gap_aff);
 
 // 04 NeedleMan-Wunsch
-int max3t(const int &a, const int &b, const int &c);
+int max3t(const std::array<int, 3> arr);
 
 class alignment {
   std::string a;
@@ -53,7 +53,7 @@ public:
 
   void align_sequences(const std::string &seq1, const std::string &seq2,
                        const int &gap_cost);
-  void recover_alignment();
+  void trace_back();
   void reset();
   void print();
 };

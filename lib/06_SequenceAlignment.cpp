@@ -1,5 +1,7 @@
 #include "06_SequenceAlignment.h"
 #include "Tools.h"
+#include <algorithm>
+#include <array>
 #include <ctype.h>
 #include <fstream>
 #include <iostream>
@@ -111,12 +113,13 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
 }
 
 // 04 NeedleMan-Wunsch
-int max3t(const int &a, const int &b, const int &c) {
-  if (a > b && a > c)
-    return a;
-  if (b > a && b > c)
-    return b;
-  return c;
+int max3t(const std::array<int, 3> arr) {
+  int max = arr[0];
+  int r = 0;
+  for (int i = 1; i < arr.size(); i++)
+    if (arr[i] > max)
+      r = i;
+  return r;
 };
 
 void alignment::print() {
@@ -151,18 +154,10 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
                                        const int &gap_cost) {
   s1 = seq1;
   s2 = seq2;
-  dim1 = s1.size() + 1; // because of the gap
+  dim1 = s1.size() + 1; // because of the gap row and column
   dim2 = s2.size() + 1;
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
-
-  //// initialization
-  // for (int i = 0; i < dim1; i++) {
-  //   for (int j = 0; j < dim2; j++) {
-  //     S[j + i * dim2] = 0;
-  //     T[j + i * dim2] = 0;
-  //   }
-  // }
 
   // Gap row
   int cost = 0;
@@ -177,9 +172,30 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
     S[i * dim2] = cost;
     cost += gap_cost;
   }
+
+  // calculate the recursive costs for each cell of S and record the best path
+  // choices in T.
+  for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
+    for (int j = 1; j < dim2; j++) {
+      int pos = j + i * dim2;
+      std::array<int, 3> arr;
+      arr[0] =
+          S[pos - j - i * dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
+      arr[1] = S[pos - j] + gap_cost;
+      arr[2] = S[pos - i * dim2] + gap_cost;
+      int max = max3t(arr);
+
+      for (auto &x : arr)
+        std::cout << x;
+      std::cout << std::endl;
+      S[pos] = arr[max];
+      T[pos] = max;
+    }
+  }
 };
 
-void needleman_Wunsch::recover_alignment(){};
+// walk T from bottom right corner and reconstruct the alignment
+void needleman_Wunsch::trace_back(){};
 
 void needleman_Wunsch::reset() {
   s1 = "";
@@ -194,11 +210,11 @@ void needleman_Wunsch::reset() {
 };
 
 void needleman_Wunsch::print() {
+  std::cout << "gap_sequences" << std::endl;
+  std::cout << "seq1: " << s1 << std::endl;
+  std::cout << "seq2: " << s2 << std::endl;
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
-  std::cout << "gap_sequences" << std::endl;
-  std::cout << "seq1: " << gap_s1 << std::endl;
-  std::cout << "seq2: " << gap_s2 << std::endl;
   std::cout << std::endl;
   std::cout << "Alignment" << std::endl;
   aln.print();
