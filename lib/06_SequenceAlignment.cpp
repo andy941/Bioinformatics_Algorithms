@@ -146,8 +146,38 @@ needleman_Wunsch::~needleman_Wunsch() {
   T = nullptr;
 };
 
-void needleman_Wunsch::align_sequences(const std::string &s1,
-                                       const std::string &s2){};
+void needleman_Wunsch::align_sequences(const std::string &seq1,
+                                       const std::string &seq2,
+                                       const int &gap_cost) {
+  s1 = seq1;
+  s2 = seq2;
+  dim1 = s1.size() + 1; // because of the gap
+  dim2 = s2.size() + 1;
+  S = new int[dim1 * dim2](); // initialize all zeroes
+  T = new int[dim1 * dim2]();
+
+  //// initialization
+  // for (int i = 0; i < dim1; i++) {
+  //   for (int j = 0; j < dim2; j++) {
+  //     S[j + i * dim2] = 0;
+  //     T[j + i * dim2] = 0;
+  //   }
+  // }
+
+  // Gap row
+  int cost = 0;
+  for (int i = 0; i < dim2; i++) {
+    S[i] = cost;
+    cost += gap_cost;
+  }
+
+  // Gap column
+  cost = 0;
+  for (int i = 0; i < dim1; i++) {
+    S[i * dim2] = cost;
+    cost += gap_cost;
+  }
+};
 
 void needleman_Wunsch::recover_alignment(){};
 
@@ -167,13 +197,16 @@ void needleman_Wunsch::print() {
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
   std::cout << "gap_sequences" << std::endl;
-  std::cout << "seq1: " << s1 << std::endl;
-  std::cout << "seq2: " << s2 << std::endl;
+  std::cout << "seq1: " << gap_s1 << std::endl;
+  std::cout << "seq2: " << gap_s2 << std::endl;
+  std::cout << std::endl;
   std::cout << "Alignment" << std::endl;
   aln.print();
+  std::cout << std::endl;
   std::cout << "S matrix" << std::endl;
   if (S != nullptr)
     print_matrix(gap_s1, gap_s2, S);
+  std::cout << std::endl;
   std::cout << "T matrix" << std::endl;
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);

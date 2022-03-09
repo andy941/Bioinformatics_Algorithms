@@ -51,7 +51,8 @@ public:
                    const std::string &alphabet);
   needleman_Wunsch(const std::string &file);
 
-  void align_sequences(const std::string &s1, const std::string &s2);
+  void align_sequences(const std::string &seq1, const std::string &seq2,
+                       const int &gap_cost);
   void recover_alignment();
   void reset();
   void print();
