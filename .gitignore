@@ -1,4 +1,5 @@
 *.o
 .cache
 build
+.DS_Store
 

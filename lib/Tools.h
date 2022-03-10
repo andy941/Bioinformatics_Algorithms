@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -31,14 +32,15 @@ template <class T>
 void print_matrix(std::string &rownames, std::string &colnames, T *mat) {
   int dim1 = rownames.size();
   int dim2 = colnames.size();
+  int w = 5;
   std::cout << ' ';
   for (int i = 0; i < dim2; i++)
-    std::cout << ' ' << colnames[i];
+    std::cout << std::setw(w) << colnames[i];
   std::cout << std::endl;
   for (int i = 0; i < dim1; i++) {
     std::cout << rownames[i];
     for (int j = 0; j < dim2; j++)
-      std::cout << ' ' << mat[j + i * dim2];
+      std::cout << std::setw(w) << mat[j + i * dim2];
     std::cout << std::endl;
   }
 };

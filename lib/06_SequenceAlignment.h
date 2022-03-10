@@ -31,7 +31,7 @@ struct alignment {
   alignment(const std::string s1, const std::string s2) : a{s1}, b{s2} {};
   void print();
   void add(const char &ac, const char &bc);
-	void flip();
+  void flip();
 };
 
 class needleman_Wunsch {

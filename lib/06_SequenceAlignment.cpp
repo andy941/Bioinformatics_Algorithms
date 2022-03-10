@@ -113,6 +113,10 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
 }
 
 // 04 NeedleMan-Wunsch
+// NOTE: This is a very simple implementation that DOESN'T take into account
+// multiple optimal alignments. The book doesn't delve into that for now. It
+// would require more symbols in the T matrix and some simple path finder
+// algorithm.
 int max3t(const std::array<int, 3> arr) {
   int max = arr[0];
   int r = 0;
@@ -124,6 +128,16 @@ int max3t(const std::array<int, 3> arr) {
 
 void alignment::print() {
   std::cout << "seq1: " << a << std::endl;
+  std::cout << "      ";
+  for (int i = 0; i < a.size(); i++) {
+    if (a[i] == b[i])
+      std::cout << '|';
+    else if (a[i] != '-' && b[i] != '-')
+      std::cout << '*';
+    else
+      std::cout << ' ';
+  }
+  std::cout << std::endl;
   std::cout << "seq2: " << b << std::endl;
 };
 
@@ -156,6 +170,7 @@ needleman_Wunsch::~needleman_Wunsch() {
 void needleman_Wunsch::align_sequences(const std::string &seq1,
                                        const std::string &seq2,
                                        const int &gap_cost) {
+  reset();
   s1 = seq1;
   s2 = seq2;
   dim1 = s1.size() + 1; // because of the gap row and column
@@ -164,7 +179,7 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
   T = new int[dim1 * dim2]();
 
   // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
-  // bottom left.
+  // bottom right.
 
   // Gap row
   int cost = 0;
@@ -191,7 +206,7 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
       int pos = j + i * dim2;
       std::array<int, 3> arr;
       arr[0] =
-          S[pos - j - i * dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
+          S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
       arr[1] = S[pos - 1] + gap_cost;
       arr[2] = S[pos - dim2] + gap_cost;
       int max = max3t(arr);
@@ -204,10 +219,9 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
 
 // walk T from bottom right corner and reconstruct the alignment
 void needleman_Wunsch::trace_back() {
-  unsigned int px = dim2;
-  unsigned int py = dim1;
+  unsigned int px = dim2 - 1;
+  unsigned int py = dim1 - 1;
   while (px != 0 || py != 0) {
-    std::cout << px << ' ' << py << std::endl;
     switch (T[px + py * dim2]) {
     case 0:
       aln.add(s1[py - 1], s2[px - 1]);
@@ -244,7 +258,7 @@ void needleman_Wunsch::reset() {
 };
 
 void needleman_Wunsch::print() {
-  std::cout << "gap_sequences" << std::endl;
+  std::cout << "Sequences" << std::endl;
   std::cout << "seq1: " << s1 << std::endl;
   std::cout << "seq2: " << s2 << std::endl;
   std::string gap_s1 = '-' + s1;
