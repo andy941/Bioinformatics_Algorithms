@@ -117,7 +117,7 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
 // multiple optimal alignments. The book doesn't delve into that for now. It
 // would require more symbols in the T matrix and some simple path finder
 // algorithm.
-int max3t(const std::array<int, 3> arr) {
+int max_arr(const std::array<int, 3> arr) {
   int max = arr[0];
   int r = 0;
   for (int i = 1; i < arr.size(); i++)
@@ -209,7 +209,7 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
           S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
       arr[1] = S[pos - 1] + gap_cost;
       arr[2] = S[pos - dim2] + gap_cost;
-      int max = max3t(arr);
+      int max = max_arr(arr);
 
       S[pos] = arr[max];
       T[pos] = max;
@@ -274,4 +274,64 @@ void needleman_Wunsch::print() {
   std::cout << "T matrix" << std::endl;
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);
+};
+
+void smith_Waterman::align_sequences(const std::string &seq1,
+                                     const std::string &seq2,
+                                     const int &gap_cost) {
+  reset();
+  s1 = seq1;
+  s2 = seq2;
+  dim1 = s1.size() + 1; // because of the gap row and column
+  dim2 = s2.size() + 1;
+  S = new int[dim1 * dim2](); // initialize all zeroes
+  T = new int[dim1 * dim2]();
+
+  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
+  // bottom right.
+
+  // calculate the recursive costs for each cell of S and record the best path
+  // choices in T.
+  for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
+    for (int j = 1; j < dim2; j++) {
+      int pos = j + i * dim2;
+      std::array<int, 3> arr;
+      arr[0] =
+          S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
+      arr[1] = S[pos - 1] + gap_cost;
+      arr[2] = S[pos - dim2] + gap_cost;
+      int max = max_arr(arr);
+
+      S[pos] = arr[max];
+      T[pos] = max;
+    }
+  }
+};
+
+// walk T from bottom right corner and reconstruct the alignment
+void smith_Waterman::trace_back() {
+  unsigned int px = dim2 - 1;
+  unsigned int py = dim1 - 1;
+  while (px != 0 || py != 0) {
+    switch (T[px + py * dim2]) {
+    case 0:
+      aln.add(s1[py - 1], s2[px - 1]);
+      px--;
+      py--;
+      break;
+    case 1:
+      aln.add('-', s2[px - 1]);
+      px--;
+      break;
+    case 2:
+      aln.add(s1[py - 1], '-');
+      py--;
+      break;
+    default:
+      std::cerr << "error tracing back the optimal alignment, check T matrix."
+                << std::endl;
+      throw 1;
+    }
+  }
+  aln.flip();
 };

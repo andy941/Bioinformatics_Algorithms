@@ -21,7 +21,7 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
                        const int &gap_cost, const int &gap_aff);
 
 // 04 NeedleMan-Wunsch
-int max3t(const std::array<int, 3> arr);
+template <class T, size_t S> int max_arr(const std::array<T, S> arr);
 
 struct alignment {
   std::string a;
@@ -35,6 +35,7 @@ struct alignment {
 };
 
 class needleman_Wunsch {
+protected:
   std::string s1;
   std::string s2;
   int *S{nullptr};
@@ -56,4 +57,14 @@ public:
   void trace_back();
   void reset();
   void print();
+};
+
+// 05 Smith-Waterman
+class smith_Waterman : public needleman_Wunsch {
+
+public:
+  using needleman_Wunsch::needleman_Wunsch;
+  void align_sequences(const std::string &seq1, const std::string &seq2,
+                       const int &gap_cost);
+  void trace_back();
 };
