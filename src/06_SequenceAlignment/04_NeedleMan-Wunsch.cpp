@@ -10,6 +10,9 @@ int main() {
   needleman_Wunsch nW{"data/BLOSUM62.csv"};
   nW.align_sequences(seq1, seq2, -8);
   nW.trace_back();
+  cout << "\nSequences From the Book "
+          "-------------------------------------------"
+       << endl;
   nW.print();
   auto sm{read_submat("data/BLOSUM62.csv")};
   cout << endl;
@@ -17,9 +20,18 @@ int main() {
   // of the optimal alignment, in this case 9.
   cout << "Best alignment score = " << score_align(nW.aln.a, nW.aln.b, sm, -8)
        << endl;
-  nW.print();
-  seq1 = "PHSWGGAAPHKKRRKSKSPHRW";
-  seq2 = "HGWAGGAAGPPHKKKKKSKSPHRW";
+
+  cout << "\nGap Test -----"
+          "------------------------------------------------------"
+       << endl;
+  seq1 = "PHSWGGAAPHKKRRKSKSPHRWAAPHKKRRTLLDWSPHRLL";
+  seq2 = "HGWAGGAAGPPHKKKKKSKSPHRWAAPHKRTLLDWSKSPHR";
+  cout << "seq1: " << seq1 << endl;
+  cout << "seq2: " << seq2 << endl;
+  cout << endl;
+  cout << "\nGap cost = -8 "
+          "------------------------------------------------------"
+       << endl;
   nW.align_sequences(seq1, seq2, -8);
   nW.trace_back();
   nW.aln.print();
@@ -27,12 +39,13 @@ int main() {
   cout << "Best alignment score = " << score_align(nW.aln.a, nW.aln.b, sm, -8)
        << endl;
 
-  seq1 = "PHSWGGAAPHKKRRKSKSPHRW";
-  seq2 = "HGWAGGAAGPPHKKKKKSKSPHRW";
-  nW.align_sequences(seq1, seq2, -1);
+  cout << "\nGap cost = -120 "
+          "----------------------------------------------------"
+       << endl;
+  nW.align_sequences(seq1, seq2, -120);
   nW.trace_back();
   nW.aln.print();
   cout << endl;
-  cout << "Best alignment score = " << score_align(nW.aln.a, nW.aln.b, sm, -1)
+  cout << "Best alignment score = " << score_align(nW.aln.a, nW.aln.b, sm, -120)
        << endl;
 }
