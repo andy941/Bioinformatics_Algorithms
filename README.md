@@ -15,3 +15,9 @@ cd ..
 cmake --build build
 cmake --install build
 ```
+
+#### Additional setup:
+Eigen matrix library is all headers, I added it as a git submodule. Just make sure is downloaded properly.
+``` bash
+git submodule update --init --recursive
+```
