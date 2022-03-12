@@ -346,6 +346,8 @@ void smith_Waterman::trace_back() {
       score_max = S[i];
     }
   }
+  best_score = score_max;
+
   unsigned int px = pos % dim2;
   unsigned int py = pos / dim2;
 

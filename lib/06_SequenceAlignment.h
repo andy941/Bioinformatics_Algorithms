@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 
 // 03 Objective function
