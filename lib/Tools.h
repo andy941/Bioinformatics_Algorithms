@@ -32,7 +32,7 @@ template <class T>
 void print_matrix(std::string &rownames, std::string &colnames, T *mat) {
   int dim1 = rownames.size();
   int dim2 = colnames.size();
-  int w = 5;
+  int w = 4;
   std::cout << ' ';
   for (int i = 0; i < dim2; i++)
     std::cout << std::setw(w) << colnames[i];

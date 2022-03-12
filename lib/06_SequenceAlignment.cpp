@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <istream>
+#include <numeric>
 #include <sstream>
 #include <vector>
 
@@ -117,14 +118,6 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
 // multiple optimal alignments. The book doesn't delve into that for now. It
 // would require more symbols in the T matrix and some simple path finder
 // algorithm.
-int max_arr(const std::array<int, 3> arr) {
-  int max = arr[0];
-  int r = 0;
-  for (int i = 1; i < arr.size(); i++)
-    if (arr[i] > max)
-      r = i;
-  return r;
-};
 
 void alignment::print() {
   std::cout << "seq1: " << a << std::endl;
@@ -276,6 +269,8 @@ void needleman_Wunsch::print() {
     print_matrix(gap_s1, gap_s2, T);
 };
 
+// 05 Smith-Waterman
+// This is a variant of the algorithm tailored for local alignments.
 void smith_Waterman::align_sequences(const std::string &seq1,
                                      const std::string &seq2,
                                      const int &gap_cost) {
@@ -287,19 +282,29 @@ void smith_Waterman::align_sequences(const std::string &seq1,
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
 
-  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
-  // bottom right.
+  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; 3 = stop.
+  // Gap row terminators
+  int cost = 0;
+  for (int i = 0; i < dim2; i++) {
+    T[i] = 3;
+  }
+  // Gap column terminators
+  for (int i = 0; i < dim1; i++) {
+    T[i * dim2] = 3;
+  }
 
   // calculate the recursive costs for each cell of S and record the best path
-  // choices in T.
+  // choices in T. The local alignment requires to evaluate 0 as alignment
+  // termination which will be encoded as '3' in the T matrix.
   for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
     for (int j = 1; j < dim2; j++) {
       int pos = j + i * dim2;
-      std::array<int, 3> arr;
+      std::array<int, 4> arr;
       arr[0] =
           S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
       arr[1] = S[pos - 1] + gap_cost;
       arr[2] = S[pos - dim2] + gap_cost;
+      arr[3] = 0;
       int max = max_arr(arr);
 
       S[pos] = arr[max];
@@ -310,9 +315,18 @@ void smith_Waterman::align_sequences(const std::string &seq1,
 
 // walk T from bottom right corner and reconstruct the alignment
 void smith_Waterman::trace_back() {
-  unsigned int px = dim2 - 1;
-  unsigned int py = dim1 - 1;
-  while (px != 0 || py != 0) {
+  int pos = 0;
+  int score_max = 0;
+  for (int i = 0; i < dim1 * dim2; i++) { // This whole thing is ugly
+    if (S[i] >= score_max) {
+      pos = i;
+      score_max = S[i];
+    }
+  }
+  unsigned int px = pos % dim2;
+  unsigned int py = pos / dim2;
+
+  while (T[px + py * dim2] != 3) {
     switch (T[px + py * dim2]) {
     case 0:
       aln.add(s1[py - 1], s2[px - 1]);

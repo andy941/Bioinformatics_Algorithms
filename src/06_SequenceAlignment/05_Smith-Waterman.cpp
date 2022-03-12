@@ -24,19 +24,19 @@ int main() {
   cout << "\nGap Test -----"
           "------------------------------------------------------"
        << endl;
-  seq1 = "PHSWGGAAPHKKRRKSKSPHRWAAPHKKRRTLLDWSPHR";
-  seq2 = "HGWAGGAAGPPHKKKKKSKSPHRWAAPHKRTLLDWSKSPHR";
+  seq1 = "PFRFFFAASKSPHRWAAPHKKMVCCVMTAAHR";
+  seq2 = "HGWAGGAASKSPHRWAAPHKKKRTLLDWSKSPHR";
   cout << "seq1: " << seq1 << endl;
   cout << "seq2: " << seq2 << endl;
   cout << endl;
   cout << "\nGap cost = -8 "
           "------------------------------------------------------"
        << endl;
-  sW.align_sequences(seq1, seq2, -8);
+  sW.align_sequences(seq1, seq2, -4);
   sW.trace_back();
   sW.aln.print();
   cout << endl;
-  cout << "Best alignment score = " << score_align(sW.aln.a, sW.aln.b, sm, -8)
+  cout << "Best alignment score = " << score_align(sW.aln.a, sW.aln.b, sm, -4)
        << endl;
 
   cout << "\nGap cost = -20 "
