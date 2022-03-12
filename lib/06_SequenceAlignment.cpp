@@ -143,6 +143,27 @@ void alignment::flip() {
   reverse(a.begin(), a.end());
   reverse(b.begin(), b.end());
 }
+
+double alignment::identity() {
+  double res = 0;
+  int max_length = std::max(a.size(), b.size());
+  for (int i = 0; i < a.size(); i++) {
+    if (a[i] == b[i])
+      res++;
+  }
+  return res / max_length;
+}
+
+std::string alignment::identical_subseq() {
+  std::string res;
+  res.reserve(std::max(a.size(), b.size()));
+  for (int i = 0; i < a.size(); i++) {
+    if (a[i] == b[i])
+      res.push_back(a[i]);
+  }
+  return res;
+};
+
 needleman_Wunsch::needleman_Wunsch(const int &match, const int &mismatch,
                                    const std::string &alphabet) {
   sm = create_submat(match, mismatch, alphabet);
@@ -208,6 +229,8 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
       T[pos] = max;
     }
   }
+
+  best_score = S[dim2 * dim1 - 1];
 };
 
 // walk T from bottom right corner and reconstruct the alignment

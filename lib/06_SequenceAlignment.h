@@ -21,7 +21,7 @@ int score_align_gapaff(const std::string &s1, const std::string &s2,
                        const int &gap_cost, const int &gap_aff);
 
 // 04 NeedleMan-Wunsch
-template <class T, size_t S> int max_arr(const std::array<T,S> arr) {
+template <class T, size_t S> int max_arr(const std::array<T, S> arr) {
   int max = arr[0];
   int r = 0;
   for (int i = 1; i < arr.size(); i++)
@@ -39,6 +39,8 @@ struct alignment {
   void print();
   void add(const char &ac, const char &bc);
   void flip();
+  double identity();
+  std::string identical_subseq();
 };
 
 class needleman_Wunsch {
@@ -50,6 +52,7 @@ protected:
   int dim1{0};
   int dim2{0};
   std::unordered_map<std::string, int> sm;
+  int best_score{0};
 
 public:
   alignment aln;
@@ -64,6 +67,7 @@ public:
   virtual void trace_back();
   void reset();
   void print();
+  int get_score() { return best_score; };
 };
 
 // 05 Smith-Waterman
