@@ -10,6 +10,108 @@
 #include <sstream>
 #include <vector>
 
+// 02 Dotplot
+DotPlot::DotPlot(const std::string seq1, const std::string seq2)
+    : s1{seq1}, s2{seq2} {
+  dim1 = seq1.length();
+  dim2 = seq2.length();
+  mat = new bool[dim1 * dim2];
+  for (int i = 0; i < dim1; i++) {
+    for (int j = 0; j < dim2; j++) {
+      mat[i + j * dim1] = 0;
+    }
+  }
+};
+
+DotPlot::~DotPlot() {
+  delete[] mat;
+  mat = nullptr;
+};
+
+void DotPlot::reset() {
+  for (int i = 0; i < dim1; i++) {
+    for (int j = 0; j < dim2; j++) {
+      mat[i + j * dim1] = 0;
+    }
+  }
+}
+
+void DotPlot::print() {
+  std::cout << ' ';
+  for (int i = 0; i < dim2; i++)
+    std::cout << ' ' << s2[i];
+  std::cout << std::endl;
+  for (int i = 0; i < dim1; i++) {
+    std::cout << s1[i];
+    for (int j = 0; j < dim2; j++) {
+      if (mat[i + j * dim1])
+        std::cout << " *";
+      else
+        std::cout << " |";
+    }
+    std::cout << std::endl;
+  }
+}
+
+void DotPlot::compare() {
+  for (int i = 0; i < dim1; i++) {
+    for (int j = 0; j < dim2; j++) {
+      if (s1[i] == s2[j])
+        mat[i + j * dim1] = 1;
+      else
+        mat[i + j * dim1] = 0;
+    }
+  }
+}
+inline unsigned int match(std::string::const_iterator b1,
+                          std::string::const_iterator e1,
+                          std::string::const_iterator b2,
+                          std::string::const_iterator e2) {
+  unsigned int res{0};
+  while (b1 != e1 && b2 != e2) {
+    if (*b1++ == *b2++)
+      res++;
+  }
+  return res;
+}
+void DotPlot::denoise(unsigned int window, unsigned int stringency) {
+  unsigned int matches{0};
+  unsigned int start{window / 2};
+  for (unsigned int i = start; i < dim1 - start; i++) {
+    for (unsigned int j = start; j < dim2 - start; j++) {
+      matches = match(s1.begin() + i - start, s1.begin() + i + start + 1,
+                      s2.begin() + j - start, s2.begin() + j + start + 1);
+      if (matches >= stringency)
+        mat[i + j * dim1] = 1;
+    }
+  }
+}
+
+/* ex3 - Write a test functions that returns the length and the starting
+ * position of the longest identity diagonal.
+ * I am using a struct of 3 elements for the diagonal. A position of -1 means
+ * that the diagonal is "empty".
+ */
+
+struct diagonal {
+  int length{0};
+  int row{0};
+  int col{0};
+  diagonal(int rr, int cc, int ll = 0) : length{ll}, row{rr}, col{cc} {};
+};
+
+std::array<int, 3> DotPlot::max_diagonal() {
+  std::vector<diagonal> v;
+  v.reserve(dim1 * dim2 / 2);
+
+  for (int i = 0; i < dim1; i++) {
+    for (int j = 0; j < dim2; j++) {
+      if (mat[i + j * dim1] == 1) {
+      }
+    }
+  }
+};
+
 // 03 Objective function
 std::unordered_map<std::string, int>
 create_submat(const int &match, const int &mismatch,

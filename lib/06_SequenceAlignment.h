@@ -2,6 +2,27 @@
 #include <string>
 #include <unordered_map>
 
+// 02 Dotplot
+class DotPlot {
+  const std::string s1;
+  const std::string s2;
+  bool *mat{nullptr};
+  int dim1{0};
+  int dim2{0};
+
+public:
+  DotPlot() = delete;
+  ~DotPlot();
+  DotPlot(const std::string, const std::string);
+
+public:
+  void print();
+  void reset();
+  void compare();
+  void denoise(unsigned int window, unsigned int stringency);
+  std::array<int, 3> max_diagonal();
+};
+
 // 03 Objective function
 std::unordered_map<std::string, int> create_submat(const int &match,
                                                    const int &mismatch,
