@@ -93,17 +93,13 @@ void DotPlot::denoise(unsigned int window, unsigned int stringency) {
  * that the diagonal is "empty".
  */
 
-struct diagonal {
-  int length{0};
-  int row{0};
-  int col{0};
-  diagonal(int rr, int cc, int ll = 0) : length{ll}, row{rr}, col{cc} {};
-};
-
-std::array<int, 3> DotPlot::max_diagonal() {
+diagonal DotPlot::max_diagonal() {
   std::vector<diagonal> v;
   v.reserve(dim1 * dim2 / 2);
+  int r = 0;
+  int c = 0;
 
+  // start with main diagonal and expand search
   for (int i = 0; i < dim1; i++) {
     for (int j = 0; j < dim2; j++) {
       if (mat[i + j * dim1] == 1) {

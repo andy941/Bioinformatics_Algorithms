@@ -2,6 +2,14 @@
 #include <string>
 #include <unordered_map>
 
+// ex03
+struct diagonal {
+  int length{0};
+  int row{0};
+  int col{0};
+  diagonal(int rr, int cc, int ll = 0) : length{ll}, row{rr}, col{cc} {};
+};
+
 // 02 Dotplot
 class DotPlot {
   const std::string s1;
@@ -20,7 +28,7 @@ public:
   void reset();
   void compare();
   void denoise(unsigned int window, unsigned int stringency);
-  std::array<int, 3> max_diagonal();
+  diagonal max_diagonal(); // ex03
 };
 
 // 03 Objective function
