@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <istream>
+#include <iterator>
 #include <numeric>
 #include <sstream>
 #include <vector>
@@ -44,7 +45,7 @@ void DotPlot::print() {
   for (int i = 0; i < dim1; i++) {
     std::cout << s1[i];
     for (int j = 0; j < dim2; j++) {
-      if (mat[i + j * dim1])
+      if (mat[j + i * dim2])
         std::cout << " *";
       else
         std::cout << " |";
@@ -57,9 +58,9 @@ void DotPlot::compare() {
   for (int i = 0; i < dim1; i++) {
     for (int j = 0; j < dim2; j++) {
       if (s1[i] == s2[j])
-        mat[i + j * dim1] = 1;
+        mat[j + i * dim2] = 1;
       else
-        mat[i + j * dim1] = 0;
+        mat[j + i * dim2] = 0;
     }
   }
 }
@@ -82,30 +83,63 @@ void DotPlot::denoise(unsigned int window, unsigned int stringency) {
       matches = match(s1.begin() + i - start, s1.begin() + i + start + 1,
                       s2.begin() + j - start, s2.begin() + j + start + 1);
       if (matches >= stringency)
-        mat[i + j * dim1] = 1;
+        mat[j + i * dim2] = 1;
     }
   }
 }
 
-/* ex3 - Write a test functions that returns the length and the starting
- * position of the longest identity diagonal.
- * I am using a struct of 3 elements for the diagonal. A position of -1 means
- * that the diagonal is "empty".
- */
+// ex03
+std::vector<diagonal> DotPlot::max_diagonal() {
+  std::vector<diagonal> vec;
+  vec.reserve(dim1 * dim2 / 2);
 
-diagonal DotPlot::max_diagonal() {
-  std::vector<diagonal> v;
-  v.reserve(dim1 * dim2 / 2);
-  int r = 0;
-  int c = 0;
-
-  // start with main diagonal and expand search
   for (int i = 0; i < dim1; i++) {
-    for (int j = 0; j < dim2; j++) {
-      if (mat[i + j * dim1] == 1) {
+    int row = i;
+    int col = 0;
+    diagonal dg{0, row, col};
+
+    while (row < dim1 && col < dim2) {
+      if (mat[col + row * dim2] == 1) {
+        dg.length++;
       }
+      if (mat[col + row * dim2] == 0 && dg.length != 0) {
+        vec.emplace_back(dg);
+        dg = diagonal{0, row, col};
+      }
+      row++;
+      col++;
+    }
+    if (dg.length != 0) {
+      vec.emplace_back(dg);
     }
   }
+
+  for (int i = 1; i < dim2; i++) {
+    int row = 0;
+    int col = i;
+    diagonal dg{0, row, col};
+
+    while (row < dim1 && col < dim2) {
+      if (mat[col + row * dim2] == 1) {
+        dg.length++;
+      }
+      if (mat[col + row * dim2] == 0 && dg.length != 0) {
+        vec.emplace_back(dg);
+        dg = diagonal{0, row, col};
+      }
+      row++;
+      col++;
+    }
+    if (dg.length != 0) {
+      vec.emplace_back(dg);
+    }
+  }
+  int max = 4;
+  std::vector<diagonal> res;
+  std::copy_if(vec.begin(), vec.end(), std::back_inserter(res),
+               [&max](const diagonal &a) { return a.length == max; });
+
+  return res;
 };
 
 // 03 Objective function

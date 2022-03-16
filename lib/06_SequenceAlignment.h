@@ -7,7 +7,8 @@ struct diagonal {
   int length{0};
   int row{0};
   int col{0};
-  diagonal(int rr, int cc, int ll = 0) : length{ll}, row{rr}, col{cc} {};
+  diagonal() = default;
+  diagonal(int ll, int rr, int cc) : length{ll}, row{rr}, col{cc} {};
 };
 
 // 02 Dotplot
@@ -28,7 +29,7 @@ public:
   void reset();
   void compare();
   void denoise(unsigned int window, unsigned int stringency);
-  diagonal max_diagonal(); // ex03
+  std::vector<diagonal> max_diagonal(); // ex03
 };
 
 // 03 Objective function
