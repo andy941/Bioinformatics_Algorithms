@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 // ex03
 struct diagonal {
@@ -72,16 +73,16 @@ template <class T, size_t S> int max_arr_withties(const std::array<T, S> arr) {
    * 0 1 1 = 6
    * 1 0 1 = 5
    * 1 1 1 = 7
-   * start from bottom right.
+   * ... works with more dimensions as well up to a limit. Not needed here.
    */
   int max = arr[0];
   int r = 0;
   for (int i = 1; i < arr.size(); i++)
     if (arr[i] > max)
-      r = i;
+      max = arr[i];
   for (int i = 0; i < arr.size(); i++)
     if (arr[i] == max)
-      r += i * 2;
+      r += std::pow(2, i);
 
   return r;
 };
@@ -109,9 +110,12 @@ protected:
   int dim2{0};
   std::unordered_map<std::string, int> sm;
   int best_score{0};
+  int gap_cost{0};
 
 public:
   alignment aln;
+  std::vector<alignment> v_aln; // ex04
+
   needleman_Wunsch() = delete;
   ~needleman_Wunsch();
   needleman_Wunsch(const int &match, const int &mismatch,
@@ -127,6 +131,7 @@ public:
   virtual void trace_back_withties(); // ex04
   void reset();
   void print();
+  void print_withties();
   int get_score() { return best_score; };
 };
 

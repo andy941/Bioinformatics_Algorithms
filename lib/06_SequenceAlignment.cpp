@@ -314,9 +314,9 @@ needleman_Wunsch::~needleman_Wunsch() {
 };
 
 void needleman_Wunsch::align_sequences(const std::string &seq1,
-                                       const std::string &seq2,
-                                       const int &gap_cost) {
+                                       const std::string &seq2, int gap_cost) {
   reset();
+  gap_cost = gap_cost;
   s1 = seq1;
   s2 = seq2;
   dim1 = s1.size() + 1; // because of the gap row and column
@@ -405,6 +405,7 @@ void needleman_Wunsch::reset() {
   dim1 = 0;
   dim2 = 0;
   aln = alignment();
+  v_aln = {};
 };
 
 void needleman_Wunsch::print() {
@@ -415,6 +416,7 @@ void needleman_Wunsch::print() {
   std::string gap_s2 = '-' + s2;
   std::cout << std::endl;
   std::cout << "Alignment" << std::endl;
+  std::cout << "Alignment Score = " << score_align(aln.a, aln.b, sm, -8);
   aln.print();
   std::cout << std::endl;
   std::cout << "S matrix" << std::endl;
@@ -438,16 +440,11 @@ void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
 
-  /* NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; 3 =
-   * diagonal/left; 4 = diagonal/left; 5 = diagonal/up; 6 = left/up; 7 = all.
-   * start from bottom right.
-   */
-
   // Gap row
   int cost = 0;
   for (int i = 0; i < dim2; i++) {
     S[i] = cost;
-    T[i] = 1;
+    T[i] = 2;
     cost += gap_cost;
   }
 
@@ -455,12 +452,9 @@ void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
   cost = 0;
   for (int i = 0; i < dim1; i++) {
     S[i * dim2] = cost;
-    T[i * dim2] = 2;
+    T[i * dim2] = 4;
     cost += gap_cost;
   }
-
-  T[0] = 0; // top right has to be 0;
-
   /* calculate the recursive costs for each cell of S and record the best path
    * choices in T.
    */
@@ -479,36 +473,120 @@ void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
       T[pos] = max_ties;
     }
   }
-
   best_score = S[dim2 * dim1 - 1];
 };
 
-// walk T from bottom right corner and reconstruct the alignment
-void needleman_Wunsch::trace_back_withties() {
-  unsigned int px = dim2 - 1;
-  unsigned int py = dim1 - 1;
-  while (px != 0 || py != 0) {
-    switch (T[px + py * dim2]) {
-    case 0:
-      aln.add(s1[py - 1], s2[px - 1]);
-      px--;
-      py--;
-      break;
-    case 1:
-      aln.add('-', s2[px - 1]);
-      px--;
-      break;
-    case 2:
-      aln.add(s1[py - 1], '-');
-      py--;
-      break;
-    default:
-      std::cerr << "error tracing back the optimal alignment, check T matrix."
-                << std::endl;
-      throw 1;
+// walk T from bottom right corner and reconstruct the alignments
+void needleman_Wunsch::trace_back_withties() { // convoluted, should be broken
+                                               // up in small classes/functions
+  std::vector<bool> v_end{false};
+  std::vector<unsigned int> v_posx;
+  std::vector<unsigned int> v_posy;
+  v_aln.push_back(alignment());
+  v_posx.push_back(dim2 - 1);
+  v_posy.push_back(dim1 - 1);
+
+  while (true) {
+    for (int i = 0; i < v_aln.size(); i++) {
+      if (v_posx[i] != 0 || v_posy[i] != 0) {
+        unsigned int px = v_posx[i];
+        unsigned int py = v_posy[i];
+        switch (T[px + py * dim2]) {
+        case 1: // diagonal
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 2: // left
+          v_aln[i].add('-', s2[px - 1]);
+          v_posx[i]--;
+          break;
+        case 4: // up
+          v_aln[i].add(s1[py - 1], '-');
+          v_posy[i]--;
+          break;
+        case 3:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 6:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln[i].add(s1[py - 1], '-');
+          v_posy[i]--;
+          break;
+        case 5:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
+          v_posx.push_back(v_posx[i]);
+          v_posy.push_back(v_posy[i] - 1);
+
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 7:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
+          v_posx.push_back(v_posx[i]);
+          v_posy.push_back(v_posy[i] - 1);
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        default:
+          std::cerr
+              << "error tracing back the optimal alignment, check T matrix."
+              << std::endl;
+          throw 1;
+        }
+      } else {
+        v_end[i] = true;
+      }
     }
+    bool end = true;
+    for (bool x : v_end) {
+      if (x == false)
+        end = false;
+    }
+    if (end)
+      break;
   }
-  aln.flip();
+  for (auto &x : v_aln)
+    x.flip();
+};
+
+void needleman_Wunsch::print_withties() {
+  std::cout << "Sequences" << std::endl;
+  std::cout << "seq1: " << s1 << std::endl;
+  std::cout << "seq2: " << s2 << std::endl;
+  std::string gap_s1 = '-' + s1;
+  std::string gap_s2 = '-' + s2;
+  std::cout << std::endl;
+  for (auto &x : v_aln) {
+    std::cout << "Alignment Score = " << score_align(x.a, x.b, sm, gap_cost)
+              << std::endl;
+    x.print();
+  }
+  std::cout << std::endl;
+  std::cout << "S matrix" << std::endl;
+  if (S != nullptr)
+    print_matrix(gap_s1, gap_s2, S);
+  std::cout << std::endl;
+  std::cout << "T matrix" << std::endl;
+  if (T != nullptr)
+    print_matrix(gap_s1, gap_s2, T);
 };
 
 /* 05 Smith-Waterman
