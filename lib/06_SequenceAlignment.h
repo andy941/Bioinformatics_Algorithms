@@ -59,6 +59,33 @@ template <class T, size_t S> int max_arr(const std::array<T, S> arr) {
   return r;
 };
 
+// ex04
+template <class T, size_t S> int max_arr_withties(const std::array<T, S> arr) {
+  /* T matrix Encoding:
+   * Diagonal; Left; Up
+   * D L U
+   * 0 0 0 = 0
+   * 1 0 0 = 1
+   * 0 1 0 = 2
+   * 0 0 1 = 4
+   * 1 1 0 = 3
+   * 0 1 1 = 6
+   * 1 0 1 = 5
+   * 1 1 1 = 7
+   * start from bottom right.
+   */
+  int max = arr[0];
+  int r = 0;
+  for (int i = 1; i < arr.size(); i++)
+    if (arr[i] > max)
+      r = i;
+  for (int i = 0; i < arr.size(); i++)
+    if (arr[i] == max)
+      r += i * 2;
+
+  return r;
+};
+
 struct alignment {
   std::string a;
   std::string b;
@@ -93,7 +120,11 @@ public:
 
   virtual void align_sequences(const std::string &seq1, const std::string &seq2,
                                const int &gap_cost);
+  virtual void align_sequences_withties(const std::string &seq1, // ex04
+                                        const std::string &seq2,
+                                        const int &gap_cost);
   virtual void trace_back();
+  virtual void trace_back_withties(); // ex04
   void reset();
   void print();
   int get_score() { return best_score; };

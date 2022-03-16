@@ -324,8 +324,9 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
 
-  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
-  // bottom right.
+  /* NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; start from
+   * bottom right.
+   */
 
   // Gap row
   int cost = 0;
@@ -345,8 +346,9 @@ void needleman_Wunsch::align_sequences(const std::string &seq1,
 
   T[0] = 0; // top right has to be 0;
 
-  // calculate the recursive costs for each cell of S and record the best path
-  // choices in T.
+  /* calculate the recursive costs for each cell of S and record the best path
+   * choices in T.
+   */
   for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
     for (int j = 1; j < dim2; j++) {
       int pos = j + i * dim2;
@@ -424,8 +426,94 @@ void needleman_Wunsch::print() {
     print_matrix(gap_s1, gap_s2, T);
 };
 
-// 05 Smith-Waterman
-// This is a variant of the algorithm tailored for local alignments.
+// ex04
+void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
+                                                const std::string &seq2,
+                                                const int &gap_cost) {
+  reset();
+  s1 = seq1;
+  s2 = seq2;
+  dim1 = s1.size() + 1; // because of the gap row and column
+  dim2 = s2.size() + 1;
+  S = new int[dim1 * dim2](); // initialize all zeroes
+  T = new int[dim1 * dim2]();
+
+  /* NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; 3 =
+   * diagonal/left; 4 = diagonal/left; 5 = diagonal/up; 6 = left/up; 7 = all.
+   * start from bottom right.
+   */
+
+  // Gap row
+  int cost = 0;
+  for (int i = 0; i < dim2; i++) {
+    S[i] = cost;
+    T[i] = 1;
+    cost += gap_cost;
+  }
+
+  // Gap column
+  cost = 0;
+  for (int i = 0; i < dim1; i++) {
+    S[i * dim2] = cost;
+    T[i * dim2] = 2;
+    cost += gap_cost;
+  }
+
+  T[0] = 0; // top right has to be 0;
+
+  /* calculate the recursive costs for each cell of S and record the best path
+   * choices in T.
+   */
+  for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
+    for (int j = 1; j < dim2; j++) {
+      int pos = j + i * dim2;
+      std::array<int, 3> arr;
+      arr[0] =
+          S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
+      arr[1] = S[pos - 1] + gap_cost;
+      arr[2] = S[pos - dim2] + gap_cost;
+      int max = max_arr(arr);
+      int max_ties = max_arr_withties(arr);
+
+      S[pos] = arr[max];
+      T[pos] = max_ties;
+    }
+  }
+
+  best_score = S[dim2 * dim1 - 1];
+};
+
+// walk T from bottom right corner and reconstruct the alignment
+void needleman_Wunsch::trace_back_withties() {
+  unsigned int px = dim2 - 1;
+  unsigned int py = dim1 - 1;
+  while (px != 0 || py != 0) {
+    switch (T[px + py * dim2]) {
+    case 0:
+      aln.add(s1[py - 1], s2[px - 1]);
+      px--;
+      py--;
+      break;
+    case 1:
+      aln.add('-', s2[px - 1]);
+      px--;
+      break;
+    case 2:
+      aln.add(s1[py - 1], '-');
+      py--;
+      break;
+    default:
+      std::cerr << "error tracing back the optimal alignment, check T matrix."
+                << std::endl;
+      throw 1;
+    }
+  }
+  aln.flip();
+};
+
+/* 05 Smith-Waterman
+ * This is a variant of the algorithm tailored for local alignments.
+ */
 void smith_Waterman::align_sequences(const std::string &seq1,
                                      const std::string &seq2,
                                      const int &gap_cost) {
@@ -437,8 +525,9 @@ void smith_Waterman::align_sequences(const std::string &seq1,
   S = new int[dim1 * dim2](); // initialize all zeroes
   T = new int[dim1 * dim2]();
 
-  // NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; 3 = stop.
-  // Gap row terminators
+  /* NOTE: In T matrix 0 = go diagonal; 1 = go left; 2 = go up; 3 = stop.
+   * Gap row terminators
+   */
   int cost = 0;
   for (int i = 0; i < dim2; i++) {
     T[i] = 3;
@@ -448,9 +537,10 @@ void smith_Waterman::align_sequences(const std::string &seq1,
     T[i * dim2] = 3;
   }
 
-  // calculate the recursive costs for each cell of S and record the best path
-  // choices in T. The local alignment requires to evaluate 0 as alignment
-  // termination which will be encoded as '3' in the T matrix.
+  /* calculate the recursive costs for each cell of S and record the best path
+   * choices in T. The local alignment requires to evaluate 0 as alignment
+   *termination which will be encoded as '3' in the T matrix.
+   */
   for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
     for (int j = 1; j < dim2; j++) {
       int pos = j + i * dim2;
