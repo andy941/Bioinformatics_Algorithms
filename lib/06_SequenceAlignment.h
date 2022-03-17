@@ -73,7 +73,6 @@ template <class T, size_t S> int max_arr_withties(const std::array<T, S> arr) {
    * 1 1 0 = 6
    * 1 0 1 = 5
    * 1 1 1 = 7
-   * ... works with more dimensions as well up to a limit. Not needed here.
    */
   int max = arr[0];
   int r = 0;
@@ -83,7 +82,6 @@ template <class T, size_t S> int max_arr_withties(const std::array<T, S> arr) {
   for (int i = 0; i < arr.size(); i++)
     if (arr[i] == max)
       r += std::pow(2, i);
-
   return r;
 };
 
@@ -141,5 +139,8 @@ public:
   using needleman_Wunsch::needleman_Wunsch;
   void align_sequences(const std::string &seq1, const std::string &seq2,
                        int gap_cost) override;
+  void align_sequences_withties(const std::string &seq1, // ex05
+                                const std::string &seq2, int gap_cost) override;
   void trace_back() override;
+  void trace_back_withties() override; // ex05
 };

@@ -680,3 +680,8 @@ void smith_Waterman::trace_back() {
   }
   aln.flip();
 };
+
+// ex05
+void align_sequences_withties(const std::string &seq1, const std::string &seq2,
+                              int gap_cost) {}
+void trace_back_withties() {}
