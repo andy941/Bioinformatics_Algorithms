@@ -18,8 +18,6 @@ int main() {
   cout << endl;
   // Easy to check: bottom right cell in T should correspond eactly to the score
   // of the optimal alignment, in this case 9.
-  cout << "Best alignment score = " << score_align(nW.aln.a, nW.aln.b, sm, -8)
-       << endl;
 
   cout << "\nGap Test -----"
           "------------------------------------------------------"

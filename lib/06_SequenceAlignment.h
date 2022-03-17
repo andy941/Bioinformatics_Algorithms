@@ -62,15 +62,15 @@ template <class T, size_t S> int max_arr(const std::array<T, S> arr) {
 
 // ex04
 template <class T, size_t S> int max_arr_withties(const std::array<T, S> arr) {
-  /* T matrix Encoding:
-   * Diagonal; Left; Up
-   * D L U
+  /* T matrix Encoding: Up; Left; Diagonal
+   * (binary read from the right in this case).
+   * U L D
    * 0 0 0 = 0
-   * 1 0 0 = 1
+   * 0 0 1 = 1
    * 0 1 0 = 2
-   * 0 0 1 = 4
-   * 1 1 0 = 3
-   * 0 1 1 = 6
+   * 1 0 0 = 4
+   * 0 1 1 = 3
+   * 1 1 0 = 6
    * 1 0 1 = 5
    * 1 1 1 = 7
    * ... works with more dimensions as well up to a limit. Not needed here.
@@ -110,7 +110,7 @@ protected:
   int dim2{0};
   std::unordered_map<std::string, int> sm;
   int best_score{0};
-  int gap_cost{0};
+  int gap_c{0};
 
 public:
   alignment aln;
@@ -123,10 +123,9 @@ public:
   needleman_Wunsch(const std::string &file);
 
   virtual void align_sequences(const std::string &seq1, const std::string &seq2,
-                               const int &gap_cost);
+                               int gap_cost);
   virtual void align_sequences_withties(const std::string &seq1, // ex04
-                                        const std::string &seq2,
-                                        const int &gap_cost);
+                                        const std::string &seq2, int gap_cost);
   virtual void trace_back();
   virtual void trace_back_withties(); // ex04
   void reset();
@@ -141,6 +140,6 @@ class smith_Waterman : public needleman_Wunsch {
 public:
   using needleman_Wunsch::needleman_Wunsch;
   void align_sequences(const std::string &seq1, const std::string &seq2,
-                       const int &gap_cost) override;
+                       int gap_cost) override;
   void trace_back() override;
 };

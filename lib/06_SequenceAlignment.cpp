@@ -316,7 +316,7 @@ needleman_Wunsch::~needleman_Wunsch() {
 void needleman_Wunsch::align_sequences(const std::string &seq1,
                                        const std::string &seq2, int gap_cost) {
   reset();
-  gap_cost = gap_cost;
+  gap_c = gap_cost;
   s1 = seq1;
   s2 = seq2;
   dim1 = s1.size() + 1; // because of the gap row and column
@@ -406,6 +406,7 @@ void needleman_Wunsch::reset() {
   dim2 = 0;
   aln = alignment();
   v_aln = {};
+  gap_c = 0;
 };
 
 void needleman_Wunsch::print() {
@@ -415,9 +416,6 @@ void needleman_Wunsch::print() {
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
   std::cout << std::endl;
-  std::cout << "Alignment" << std::endl;
-  std::cout << "Alignment Score = " << score_align(aln.a, aln.b, sm, -8);
-  aln.print();
   std::cout << std::endl;
   std::cout << "S matrix" << std::endl;
   if (S != nullptr)
@@ -426,13 +424,19 @@ void needleman_Wunsch::print() {
   std::cout << "T matrix" << std::endl;
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);
+  std::cout << "Alignment:" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Alignment Score = " << score_align(aln.a, aln.b, sm, gap_c)
+            << " ; gap_cost = " << gap_c << std::endl;
+  aln.print();
 };
 
 // ex04
 void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
                                                 const std::string &seq2,
-                                                const int &gap_cost) {
+                                                int gap_cost) {
   reset();
+  gap_c = gap_cost;
   s1 = seq1;
   s2 = seq2;
   dim1 = s1.size() + 1; // because of the gap row and column
@@ -476,7 +480,7 @@ void needleman_Wunsch::align_sequences_withties(const std::string &seq1,
   best_score = S[dim2 * dim1 - 1];
 };
 
-// walk T from bottom right corner and reconstruct the alignments
+// ex04
 void needleman_Wunsch::trace_back_withties() { // convoluted, should be broken
                                                // up in small classes/functions
   std::vector<bool> v_end{false};
@@ -574,12 +578,6 @@ void needleman_Wunsch::print_withties() {
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
   std::cout << std::endl;
-  for (auto &x : v_aln) {
-    std::cout << "Alignment Score = " << score_align(x.a, x.b, sm, gap_cost)
-              << std::endl;
-    x.print();
-  }
-  std::cout << std::endl;
   std::cout << "S matrix" << std::endl;
   if (S != nullptr)
     print_matrix(gap_s1, gap_s2, S);
@@ -587,15 +585,23 @@ void needleman_Wunsch::print_withties() {
   std::cout << "T matrix" << std::endl;
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);
+  std::cout << std::endl;
+  std::cout << "Alignments:" << std::endl;
+  for (auto &x : v_aln) {
+    std::cout << std::endl;
+    std::cout << "Alignment Score = " << score_align(x.a, x.b, sm, gap_c)
+              << " ; gap_cost = " << gap_c << std::endl;
+    x.print();
+  }
 };
 
 /* 05 Smith-Waterman
  * This is a variant of the algorithm tailored for local alignments.
  */
 void smith_Waterman::align_sequences(const std::string &seq1,
-                                     const std::string &seq2,
-                                     const int &gap_cost) {
+                                     const std::string &seq2, int gap_cost) {
   reset();
+  gap_c = gap_cost;
   s1 = seq1;
   s2 = seq2;
   dim1 = s1.size() + 1; // because of the gap row and column
