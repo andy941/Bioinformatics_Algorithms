@@ -17,18 +17,13 @@ int main() {
   nW.trace_back_withties();
   nW.print_withties();
   cout << endl;
-  cout << "\nGap cost = -8 "
-          "------------------------------------------------------"
-       << endl;
 
   /* Easy to check: bottom right cell in T should correspond eactly to the
    * score of the optimal alignment.
    */
 
-  seq1 = "PHSWGGAAPHKKKKKRRKSKSPHRWHR";
-  seq2 = "HGWAGGAAGPPHKKSKSPHSPHR";
-  cout << "seq1: " << seq1 << endl;
-  cout << "seq2: " << seq2 << endl;
+  seq1 = "PHSWGGAAPHKKKKKKAGGAAGPPHKKKKKKKKKRRKSKSPHRWHR";
+  seq2 = "HGWAGGAAGPPHKKKKKKKKKSKSPHSPHR";
   cout << endl;
   cout << "\nGap cost = -8 "
           "------------------------------------------------------"

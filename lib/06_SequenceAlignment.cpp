@@ -410,12 +410,8 @@ void needleman_Wunsch::reset() {
 };
 
 void needleman_Wunsch::print() {
-  std::cout << "Sequences" << std::endl;
-  std::cout << "seq1: " << s1 << std::endl;
-  std::cout << "seq2: " << s2 << std::endl;
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
-  std::cout << std::endl;
   std::cout << std::endl;
   std::cout << "S matrix" << std::endl;
   if (S != nullptr)
@@ -424,6 +420,10 @@ void needleman_Wunsch::print() {
   std::cout << "T matrix" << std::endl;
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);
+  std::cout << std::endl;
+  std::cout << "Sequences" << std::endl;
+  std::cout << "seq1: " << s1 << std::endl;
+  std::cout << "seq2: " << s2 << std::endl;
   std::cout << "Alignment:" << std::endl;
   std::cout << std::endl;
   std::cout << "Alignment Score = " << score_align(aln.a, aln.b, sm, gap_c)
@@ -572,9 +572,6 @@ void needleman_Wunsch::trace_back_withties() { // convoluted, should be broken
 };
 
 void needleman_Wunsch::print_withties() {
-  std::cout << "Sequences" << std::endl;
-  std::cout << "seq1: " << s1 << std::endl;
-  std::cout << "seq2: " << s2 << std::endl;
   std::string gap_s1 = '-' + s1;
   std::string gap_s2 = '-' + s2;
   std::cout << std::endl;
@@ -586,6 +583,9 @@ void needleman_Wunsch::print_withties() {
   if (T != nullptr)
     print_matrix(gap_s1, gap_s2, T);
   std::cout << std::endl;
+  std::cout << "Sequences" << std::endl;
+  std::cout << "seq1: " << s1 << std::endl;
+  std::cout << "seq2: " << s2 << std::endl;
   std::cout << "Alignments:" << std::endl;
   for (auto &x : v_aln) {
     std::cout << std::endl;
@@ -681,7 +681,158 @@ void smith_Waterman::trace_back() {
   aln.flip();
 };
 
-// ex05
-void align_sequences_withties(const std::string &seq1, const std::string &seq2,
-                              int gap_cost) {}
-void trace_back_withties() {}
+/* ex05
+ * NOTE: In T matrix 1 = go diagonal; 2 = go left; 3 = go up; 0 = stop.
+ * Gap row terminators
+ */
+void smith_Waterman::align_sequences_withties(const std::string &seq1,
+                                              const std::string &seq2,
+                                              int gap_cost) {
+  reset();
+  gap_c = gap_cost;
+  s1 = seq1;
+  s2 = seq2;
+  dim1 = s1.size() + 1; // because of the gap row and column
+  dim2 = s2.size() + 1;
+  S = new int[dim1 * dim2](); // initialize all zeroes
+  T = new int[dim1 * dim2]();
+
+  /* calculate the recursive costs for each cell of S and record the best path
+   * choices in T. The local alignment requires to evaluate 0 as alignment
+   *termination which will be encoded as '3' in the T matrix.
+   */
+  for (int i = 1; i < dim1; i++) { // start from 1, gap col/row calculated
+    for (int j = 1; j < dim2; j++) {
+      int pos = j + i * dim2;
+      std::array<int, 3> arr;
+      arr[0] =
+          S[pos - 1 - dim2] + score_pos(s1[i - 1], s2[j - 1], sm, gap_cost);
+      arr[1] = S[pos - 1] + gap_cost;
+      arr[2] = S[pos - dim2] + gap_cost;
+
+      int max = max_arr(arr);
+      int max_ties = max_arr_withties(arr);
+
+      if (arr[max] <= 0) {
+        T[pos] = 0;
+        S[pos] = 0;
+      } else {
+        T[pos] = max_ties;
+        S[pos] = arr[max];
+      }
+    }
+  }
+}
+void smith_Waterman::trace_back_withties() {
+
+  int score_max = 0;
+  for (int i = 0; i < dim1 * dim2; i++) {
+    if (S[i] >= score_max) {
+      score_max = S[i];
+    }
+  }
+  best_score = score_max;
+
+  std::vector<bool> v_end;
+  std::vector<unsigned int> v_posx;
+  std::vector<unsigned int> v_posy;
+
+  // Initialize starting points at max alignment score.
+  for (int i = 0; i < dim1 * dim2; i++) {
+    if (S[i] == score_max) {
+      unsigned int px = i % dim2;
+      unsigned int py = i / dim2;
+      v_aln.push_back(alignment());
+      v_posx.push_back(px);
+      v_posy.push_back(py);
+      v_end.push_back(false);
+    }
+  }
+
+  while (true) {
+    for (int i = 0; i < v_aln.size(); i++) {
+      if ((v_posx[i] != 0 || v_posy[i] != 0) && v_end[i] == false) {
+        unsigned int px = v_posx[i];
+        unsigned int py = v_posy[i];
+        std::cout << px << ' ' << py << ' ' << i << "   " << T[px + py * dim2]
+                  << std::endl;
+        switch (T[px + py * dim2]) {
+        case 0:
+          v_end[i] = true;
+          break;
+        case 1: // diagonal
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 2: // left
+          v_aln[i].add('-', s2[px - 1]);
+          v_posx[i]--;
+          break;
+        case 4: // up
+          v_aln[i].add(s1[py - 1], '-');
+          v_posy[i]--;
+          break;
+        case 3:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 6:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln[i].add(s1[py - 1], '-');
+          v_posy[i]--;
+          break;
+        case 5:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
+          v_posx.push_back(v_posx[i]);
+          v_posy.push_back(v_posy[i] - 1);
+
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        case 7:
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
+          v_posx.push_back(v_posx[i] - 1);
+          v_posy.push_back(v_posy[i]);
+          v_aln.push_back(v_aln[i]);
+          v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
+          v_posx.push_back(v_posx[i]);
+          v_posy.push_back(v_posy[i] - 1);
+          v_aln[i].add(s1[py - 1], s2[px - 1]);
+          v_posx[i]--;
+          v_posy[i]--;
+          break;
+        default:
+          std::cerr
+              << "error tracing back the optimal alignment, check T matrix."
+              << std::endl;
+          throw 1;
+        }
+      } else {
+        v_end[i] = true;
+      }
+    }
+
+    bool end = true;
+    for (bool x : v_end) {
+      if (x == false)
+        end = false;
+    }
+    if (end)
+      break;
+  }
+
+  for (auto &x : v_aln)
+    x.flip();
+}
