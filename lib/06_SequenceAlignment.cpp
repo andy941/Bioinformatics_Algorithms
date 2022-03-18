@@ -838,3 +838,30 @@ void smith_Waterman::trace_back_withties() {
   for (auto &x : v_aln)
     x.flip();
 }
+
+// ex06
+double get_id_dna(const std::string &seq1, const std::string &seq2) {
+  double id;
+  static needleman_Wunsch nWi{1, 0, "ATCG"};
+  nWi.align_sequences(seq1, seq2, 0);
+  nWi.trace_back();
+  return nWi.aln.identity();
+}
+
+std::vector<int> find_mate(const std::vector<std::string> &l1,
+                           const std::vector<std::string> &l2) {
+  std::vector<int> res;
+  for (int i = 0; i < l1.size(); i++) {
+    double max_val = 0;
+    int max_idx = 0;
+    for (int j = 0; j < l2.size(); j++) {
+      double val = get_id_dna(l1[i], l2[j]);
+      if (val > max_val) {
+        max_val = val;
+        max_idx = j;
+      }
+    }
+    res.push_back(max_idx);
+  }
+  return res;
+}

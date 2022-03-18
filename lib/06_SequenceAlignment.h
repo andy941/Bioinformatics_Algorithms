@@ -145,3 +145,9 @@ public:
   void trace_back() override;
   void trace_back_withties() override; // ex05
 };
+
+// ex06
+double get_id_dna(const std::string &seq1, const std::string &seq2);
+
+std::vector<int> find_mate(const std::vector<std::string> &l1,
+                           const std::vector<std::string> &l2);
