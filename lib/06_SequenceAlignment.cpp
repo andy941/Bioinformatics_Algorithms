@@ -754,8 +754,6 @@ void smith_Waterman::trace_back_withties() {
       if ((v_posx[i] != 0 || v_posy[i] != 0) && v_end[i] == false) {
         unsigned int px = v_posx[i];
         unsigned int py = v_posy[i];
-        std::cout << px << ' ' << py << ' ' << i << "   " << T[px + py * dim2]
-                  << std::endl;
         switch (T[px + py * dim2]) {
         case 0:
           v_end[i] = true;
@@ -781,12 +779,14 @@ void smith_Waterman::trace_back_withties() {
           v_aln[i].add(s1[py - 1], s2[px - 1]);
           v_posx[i]--;
           v_posy[i]--;
+          v_end.push_back(false);
           break;
         case 6:
           v_aln.push_back(v_aln[i]);
           v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
           v_posx.push_back(v_posx[i] - 1);
           v_posy.push_back(v_posy[i]);
+          v_end.push_back(false);
           v_aln[i].add(s1[py - 1], '-');
           v_posy[i]--;
           break;
@@ -795,7 +795,7 @@ void smith_Waterman::trace_back_withties() {
           v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
           v_posx.push_back(v_posx[i]);
           v_posy.push_back(v_posy[i] - 1);
-
+          v_end.push_back(false);
           v_aln[i].add(s1[py - 1], s2[px - 1]);
           v_posx[i]--;
           v_posy[i]--;
@@ -805,10 +805,12 @@ void smith_Waterman::trace_back_withties() {
           v_aln[v_aln.size() - 1].add('-', s2[px - 1]);
           v_posx.push_back(v_posx[i] - 1);
           v_posy.push_back(v_posy[i]);
+          v_end.push_back(false);
           v_aln.push_back(v_aln[i]);
           v_aln[v_aln.size() - 1].add(s1[py - 1], '-');
           v_posx.push_back(v_posx[i]);
           v_posy.push_back(v_posy[i] - 1);
+          v_end.push_back(false);
           v_aln[i].add(s1[py - 1], s2[px - 1]);
           v_posx[i]--;
           v_posy[i]--;
