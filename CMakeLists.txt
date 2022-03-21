@@ -11,6 +11,7 @@ list(
   APPEND dirs
   05_FindingPatterns
   06_SequenceAlignment
+  07_BlastSearch
 )
 
 foreach(dir ${dirs})
