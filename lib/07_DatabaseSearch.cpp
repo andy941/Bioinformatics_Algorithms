@@ -6,9 +6,9 @@
 #include <utility>
 #include <vector>
 
-std::vector<std::pair<const std::string, const std::string>>
+std::vector<std::pair<std::string, std::string>>
 read_fasta(const std::string &filename) {
-  std::vector<std::pair<const std::string, const std::string>> fa_seqs;
+  std::vector<std::pair<std::string, std::string>> fa_seqs;
   std::string name;
   std::string seq;
   std::ifstream ifs{filename};
@@ -40,7 +40,10 @@ inline void print_fasta(const std::string &fasta, unsigned int linesize = 80) {
 };
 
 BLAST_db::BLAST_db(const std::string &filename_db,
-                   const std::string &filename_blosum, unsigned int gap_cost);
+                   const std::string &filename_blosum, unsigned int gap_cost) {
+  db = read_fasta(filename_db);
+  sm = read_submat(filename_blosum);
+};
 BLAST_db::BLAST_db(const std::string &filename_db, const int &match,
                    const int &mismatch, const std::string &alphabet,
-                   unsigned int gap_cost);
+                   unsigned int gap_cost){};

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
-std::vector<std::pair<const std::string, const std::string>>
+std::vector<std::pair<std::string, std::string>>
 read_fasta(const std::string &filename);
 void print_fasta(const std::string &fasta);
 
@@ -18,6 +18,7 @@ struct BLAST_hit {
 
 class BLAST_db {
   std::vector<std::pair<std::string, std::string>> db;
+  std::unordered_map<std::string, int> sm;
   std::vector<std::string> qkmers;
   std::vector<BLAST_hit> bhits;
   unsigned int ksize{17};
