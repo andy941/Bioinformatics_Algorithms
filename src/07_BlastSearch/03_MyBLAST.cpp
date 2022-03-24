@@ -5,7 +5,7 @@
 /*
  * Given two lists of sequences return a list of index pairs referring to the
  * the most similar sequences in both lists. Similarity is defined as sequence
- * identity.
+ * identity. Do not consider gaps in this implementation (Chapter example).
  */
 
 using namespace std;
@@ -24,4 +24,6 @@ int main() {
       "TCTTCCAAAGAGTCGAGCATA"};
 
   cout << "\nSequence hits ---------------------------------------" << endl;
+
+  BLAST_db db{"data/Ath_Chr1_1-1000000_CDS.fasta", 1, 0, "ATCG"};
 }
