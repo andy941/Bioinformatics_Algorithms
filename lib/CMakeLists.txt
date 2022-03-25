@@ -1,6 +1,7 @@
 add_library(
   lib
   "Tools.cpp"
+	"05_FindingPatterns.cpp"
   "06_SequenceAlignment.cpp"
   "07_DatabaseSearch.cpp"
 )
