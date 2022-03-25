@@ -26,4 +26,5 @@ int main() {
   cout << "\nSequence hits ---------------------------------------" << endl;
 
   BLAST_db db{"data/Ath_Chr1_1-1000000_CDS.fasta", 1, 0, "ATCG"};
+  db.find_sequence(query, 5);
 }

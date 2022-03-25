@@ -1,4 +1,5 @@
 #include "07_DatabaseSearch.h"
+#include <algorithm>
 #include <fstream>
 #include <ostream>
 #include <sstream>
@@ -48,9 +49,22 @@ read_fasta(const std::string &filename) {
   return fa_seqs;
 };
 
-inline std::vector<std::string> return_kmers(unsigned int kmer_size,
-                                             const std::string &seq){
+inline std::unordered_map<std::string, std::vector<std::string::const_iterator>>
+return_kmers(unsigned int kmer_size, const std::string &seq) {
+  std::unordered_map<std::string, std::vector<std::string::const_iterator>>
+      kmers;
+  kmers.reserve(seq.size() - kmer_size);
 
+  for (int i = 0; i <= seq.size() - kmer_size; i++) {
+    std::string ks = seq.substr(i, kmer_size);
+    auto pks = kmers.find(ks);
+    if (pks == kmers.end())
+      kmers[ks] = std::vector<std::string::const_iterator>{seq.begin() + i};
+    else
+      kmers[ks].push_back(seq.begin() + i);
+  }
+
+  return kmers;
 };
 
 /*
@@ -70,9 +84,7 @@ BLAST_db::BLAST_db(const std::string &filename_db, const int &match,
   sm = create_submat(match, mismatch, alphabet);
 };
 
-void BLAST_db::build_index(unsigned short int kmer_size, int threshold,
-                           int gap_cost){
-
+void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
+  std::unordered_map<std::string, std::vector<std::string::const_iterator>>
+      kmers = return_kmers(ksize, query);
 };
-
-void BLAST_db::find_sequence(const std::string &query){};
