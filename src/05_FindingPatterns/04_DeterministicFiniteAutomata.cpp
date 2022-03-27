@@ -1,38 +1,25 @@
 #include "05_FindingPatterns.h"
 #include "Tools.h"
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <cstring>
 #include <iostream>
-#include <iterator>
-#include <sstream>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 using namespace std;
 
+/*
+ * Small bug somewhere, finds 954 of 957 total.
+ * Possibly because it doesn't find overlapping patterns?
+ */
+
 int main() {
   const string seq = random_seq(1e9, 'D');
-  const string pattern{"GATCGATCGATCGATCCCCCGATCC"};
+  const string pattern{"GATCCGATCC"};
 
   DFA dfa{"ATCG", pattern};
+  // dfa.print_automata();
   {
     Timer t;
     auto pa = dfa.occurrences_pattern(seq);
+    // print_pattern_hits(seq, pattern, pa);
+    cout << "hits     :\t" << pa.size() << endl;
   }
-
-  // cout << "hits     :\t" << pa.size() << endl;
-
-  dfa.print_automata();
-  // cout << "pattern :\t " << pattern << endl;
-  // cout << "sequence:\t " << seq << endl;
-  // auto ps = dfa.apply_seq(seq);
-  // cout << "states  :\t";
-  // for (auto x : ps)
-  //   cout << x;
-  // cout << endl;
-  // cout << "hits    :\t ";
-  // print_pattern_hits(seq, pattern, pa);
 }

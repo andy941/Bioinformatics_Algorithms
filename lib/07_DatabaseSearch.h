@@ -1,3 +1,5 @@
+#pragma once
+
 #include "06_SequenceAlignment.h"
 #include <string>
 #include <unordered_map>

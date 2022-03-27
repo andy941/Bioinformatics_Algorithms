@@ -68,11 +68,12 @@ void BoyerMoore::preprocess_gsr() {
   s = std::vector<int>(pattern.length() + 1, 0);
   int i = pattern.length();
   int j = pattern.length() + 1;
+
   f[i] = j;
   while (i > 0) {
     while (j <= pattern.length() && pattern[i - 1] != pattern[j - 1]) {
       if (s[j] == 0)
-        s[j] = j - 1;
+        s[j] = j - i;
       j = f[j];
     }
     --i;
@@ -92,13 +93,11 @@ std::vector<std::string::const_iterator>
 BoyerMoore::find_all(const std::string &text) {
 
   std::vector<std::string::const_iterator> res;
-  res.reserve(text.size() / pattern.size());
   int i = 0;
   int j = pattern.length() - 1;
   char c;
 
   while (i <= text.length() - pattern.length()) {
-
     j = pattern.length() - 1;
     while (j >= 0 && pattern[j] == text[j + i]) {
       --j;
@@ -172,8 +171,9 @@ DFA::occurrences_pattern(const std::string &text) {
   std::vector<std::string::const_iterator> res;
   for (int i = 0; i < text.length(); i++) {
     q = next_state(q, text[i]);
-    if (q == numstates - 1)
+    if (q == numstates - 1) {
       res.push_back(text.begin() + i - numstates + 2);
+    }
   }
   return res;
 };

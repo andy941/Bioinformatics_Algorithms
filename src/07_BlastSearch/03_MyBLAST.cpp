@@ -1,3 +1,4 @@
+#include "05_FindingPatterns.h"
 #include "07_DatabaseSearch.h"
 #include <iostream>
 #include <string>
