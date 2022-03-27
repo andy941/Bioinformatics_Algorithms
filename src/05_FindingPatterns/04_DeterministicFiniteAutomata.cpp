@@ -15,12 +15,15 @@ using namespace std;
 
 int main() {
   const string seq = random_seq(1e9, 'D');
-  const string pattern{"GATCC"};
+  const string pattern{"GATCGATCGATCGATCCCCCGATCC"};
 
   DFA dfa{"ATCG", pattern};
-  auto pa = dfa.occurrences_pattern(seq);
+  {
+    Timer t;
+    auto pa = dfa.occurrences_pattern(seq);
+  }
 
-  cout << "hits     :\t" << pa.size() << endl;
+  // cout << "hits     :\t" << pa.size() << endl;
 
   dfa.print_automata();
   // cout << "pattern :\t " << pattern << endl;

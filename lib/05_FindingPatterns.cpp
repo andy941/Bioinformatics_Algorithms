@@ -1,5 +1,6 @@
 #include "05_FindingPatterns.h"
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -107,7 +108,7 @@ BoyerMoore::find_all(const std::string &text) {
       i += s[0];
     } else {
       c = text[j + i];
-      i += fmax(s[j + 1], j - occ[c]);
+      i += std::max(s[j + 1], j - occ[c]);
     }
   }
   return res;
@@ -151,7 +152,7 @@ void DFA::print_automata() {
   }
 };
 
-char DFA::next_state(const int &q, const char &c) {
+inline char DFA::next_state(const int &q, const char &c) {
   return transition_table[std::to_string(q) + c];
 };
 
