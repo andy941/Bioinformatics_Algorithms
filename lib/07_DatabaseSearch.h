@@ -14,13 +14,19 @@ inline std::unordered_map<std::string, std::vector<std::string::const_iterator>>
 return_kmers(unsigned int kmer_size, const std::string &seq);
 
 struct BLAST_hit {
-  std::string name;
-  std::string seq;
-  alignment aln;
-  unsigned int begin{0};
-  unsigned int end{0};
-  BLAST_hit() = default;
+
+  std::string::const_iterator q; // query hit
+  std::string::const_iterator b; // seq hit
+  std::string::const_iterator e; // seq hit
+  BLAST_hit(std::string::const_iterator qq, std::string::const_iterator bb,
+            std::string::const_iterator ee)
+      : q{qq}, b{bb}, e{ee} {};
 };
+
+std::vector<BLAST_hit> find_hits_seq(
+    std::unordered_map<std::string, std::vector<std::string::const_iterator>>
+        &kmers,
+    const std::string &seq, unsigned int kmer_size);
 
 class BLAST_db {
   std::vector<std::pair<std::string, std::string>> db;
@@ -34,5 +40,5 @@ public:
            const int &mismatch, const std::string &alphabet);
 
 public:
-  void find_sequence(const std::string &query, unsigned int ksize = 18);
+  void find_sequence(const std::string &query, unsigned int ksize = 17);
 };
