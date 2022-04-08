@@ -26,7 +26,7 @@ struct BLAST_hit {
 std::vector<BLAST_hit> find_hits_seq(
     std::unordered_map<std::string, std::vector<std::string::const_iterator>>
         &kmers,
-    const std::string &seq, unsigned int kmer_size);
+    const std::string &seq, unsigned int kmer_size, unsigned int dist);
 
 class BLAST_db {
   std::vector<std::pair<std::string, std::string>> db;
