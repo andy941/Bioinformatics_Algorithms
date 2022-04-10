@@ -74,25 +74,22 @@ std::vector<BLAST_hit> find_hits_seq(
     const std::string &seq, unsigned int kmer_size) {
 
   std::vector<BLAST_hit> hits;
-  unsigned int curr_beg{0};
 
-  for (int i = 0; i <= seq.size() - kmer_size; i++) {
-    std::string ks = seq.substr(i, kmer_size);
+  for (auto x = seq.begin(); x <= seq.end() - kmer_size; x++) {
+    std::string ks{x, x + kmer_size};
     auto pks = kmers.find(ks);
     if (pks != kmers.end()) {
-      if (i > curr_beg) {
-        if (hits.empty()) // maybe there is a better way here
-          curr_beg = i;
-        for (auto &x : pks->second) {
-          hits.push_back(BLAST_hit(x, seq.begin() + curr_beg,
-                                   seq.begin() + i + kmer_size));
-        }
-        curr_beg = i + kmer_size;
+      for (auto &y : pks->second) {
+        hits.push_back(BLAST_hit(y, x, x + kmer_size));
       }
-      std::cout << "    " << curr_beg << " " << i << std::endl;
     }
   }
   return hits;
+}
+
+void extend_hits(const std::string &query, std::vector<BLAST_hit> &hits) {
+  for (auto &x : hits) {
+  }
 }
 
 /*
@@ -119,21 +116,11 @@ void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
 
   for (auto &x : db) {
     std::vector<BLAST_hit> hits = find_hits_seq(kmers, x.second, ksize);
-    if (hits.size() != 0) {
+    if (hits.size() != 0)
       all_hits.push_back(hits);
-      std::cout << x.first << " = " << hits.size() << std::endl;
-      std::cout << x.second << std::endl;
-      print_pattern_hits(x.second, std::string(hits[0].b, hits[0].e),
-                         hits[0].b);
-      // print_pattern_hits(x.second, std::string(hits[1].q, hits[1].q + ksize),
-      //                   hits[1].b);
-      // print_pattern_hits(x.second, std::string(hits[2].q, hits[2].q + ksize),
-      //                   hits[2].b);
-      // for (auto &y : hits) {
-      //  std::cout << std::string(y.q, y.q + ksize) << "\n"
-      //            << std::string(y.b, y.e) << "\n"
-      //            << std::endl;
-      //}
-    }
+  }
+
+  for (auto &x : all_hits) {
+    extend_hits(query, x);
   }
 }

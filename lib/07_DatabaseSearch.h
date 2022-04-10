@@ -28,6 +28,8 @@ std::vector<BLAST_hit> find_hits_seq(
         &kmers,
     const std::string &seq, unsigned int kmer_size, unsigned int dist);
 
+void extend_hits(const std::string &query, std::vector<BLAST_hit> &hits);
+
 class BLAST_db {
   std::vector<std::pair<std::string, std::string>> db;
   std::unordered_map<std::string, int> sm;
