@@ -19,9 +19,10 @@ struct BLAST_hit {
   std::string::const_iterator b; // seq hit
   std::string::const_iterator e; // seq hit
   std::string seq_name;
+  int score{0};
   BLAST_hit(std::string::const_iterator qq, std::string::const_iterator bb,
-            std::string::const_iterator ee)
-      : q{qq}, b{bb}, e{ee} {};
+            std::string::const_iterator ee, std::string sn, int sc)
+      : q{qq}, b{bb}, e{ee}, seq_name{sn}, score{sc} {};
 };
 
 std::vector<BLAST_hit> find_hits_seq(
@@ -36,6 +37,15 @@ class BLAST_db {
   std::vector<std::pair<std::string, std::string>> db;
   std::unordered_map<std::string, int> sm;
   std::vector<BLAST_hit> bhits;
+  needleman_Wunsch nW;
+
+private:
+  std::vector<BLAST_hit> find_hits_seq(
+      std::unordered_map<std::string, std::vector<std::string::const_iterator>>
+          &kmers,
+      const std::pair<std::string, std::string> &seq, unsigned int kmer_size);
+  void extend_hits(const std::string &query, const std::string &seq,
+                   std::vector<BLAST_hit> &hits, unsigned int kmer_size);
 
 public:
   BLAST_db() = delete;

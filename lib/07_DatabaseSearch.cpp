@@ -2,6 +2,7 @@
 #include "Tools.h"
 #include <algorithm>
 #include <fstream>
+#include <numeric>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -68,36 +69,53 @@ return_kmers(unsigned int kmer_size, const std::string &seq) {
   return kmers;
 };
 
-std::vector<BLAST_hit> find_hits_seq(
+std::vector<BLAST_hit> BLAST_db::find_hits_seq(
     std::unordered_map<std::string, std::vector<std::string::const_iterator>>
         &kmers,
-    const std::string &seq, unsigned int kmer_size) {
+    const std::pair<std::string, std::string> &seq, unsigned int kmer_size) {
 
   std::vector<BLAST_hit> hits;
 
-  for (auto x = seq.begin(); x <= seq.end() - kmer_size; x++) {
+  for (auto x = seq.second.begin(); x <= seq.second.end() - kmer_size; x++) {
     std::string ks{x, x + kmer_size};
     auto pks = kmers.find(ks);
     if (pks != kmers.end()) {
       for (auto &y : pks->second) {
-        hits.push_back(BLAST_hit(y, x, x + kmer_size));
+        hits.push_back(BLAST_hit(y, x, x + kmer_size, seq.first, kmer_size));
       }
     }
   }
   return hits;
 }
 
-void extend_hits(const std::string &query, const std::string &seq,
-                 std::vector<BLAST_hit> &hits, unsigned int kmer_size) {
+void BLAST_db::extend_hits(const std::string &query, const std::string &seq,
+                           std::vector<BLAST_hit> &hits,
+                           unsigned int kmer_size) {
+  int contr{0};
+  int k{0};
+
   for (auto &x : hits) {
-    while (x.q != query.begin() && x.b != seq.begin()) {
+    while (contr * 2 >= k && x.q != query.begin() && x.b != seq.begin()) {
+      if (score_pos(*x.q, *x.b, sm, 0) == 1) {
+        x.score++;
+        contr++;
+      }
+      k++;
       x.q--;
       x.b--;
     }
 
-    while (x.q + kmer_size != query.end() && x.b != seq.end()) {
+    contr = 0;
+    k = 0;
+    while (contr * 2 >= k && x.q + kmer_size != query.end() &&
+           x.e != seq.end()) {
       x.q++;
       x.e++;
+      if (score_pos(*x.q, *x.e, sm, 0) == 1) {
+        x.score++;
+        contr++;
+      }
+      k++;
     }
   }
 }
@@ -108,13 +126,15 @@ void extend_hits(const std::string &query, const std::string &seq,
  */
 
 BLAST_db::BLAST_db(const std::string &filename_db,
-                   const std::string &filename_blosum) {
+                   const std::string &filename_blosum)
+    : nW{needleman_Wunsch(filename_blosum)} {
   db = read_fasta(filename_db);
   sm = read_submat(filename_blosum);
 };
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int &match,
-                   const int &mismatch, const std::string &alphabet) {
+                   const int &mismatch, const std::string &alphabet)
+    : nW{needleman_Wunsch(match, mismatch, alphabet)} {
   db = read_fasta(filename_db);
   sm = create_submat(match, mismatch, alphabet);
 };
@@ -122,21 +142,26 @@ BLAST_db::BLAST_db(const std::string &filename_db, const int &match,
 void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
   std::unordered_map<std::string, std::vector<std::string::const_iterator>>
       kmers = return_kmers(ksize, query);
-  std::vector<std::vector<BLAST_hit>> all_hits;
+  std::vector<BLAST_hit> best_hits;
+  bhits = {};
 
   for (auto &x : db) {
-    std::vector<BLAST_hit> hits = find_hits_seq(kmers, x.second, ksize);
+    std::vector<BLAST_hit> hits = find_hits_seq(kmers, x, ksize);
     if (hits.size() != 0) {
       extend_hits(query, x.second, hits, ksize);
-
-      // std::cout << x.first << " = " << hits.size() << std::endl;
-      // std::cout << x.second << std::endl;
-      // print_pattern_hits(x.second, std::string(hits[2].b, hits[2].e),
-      //                    hits[2].b);
-      all_hits.push_back(hits);
+      BLAST_hit b_hit = *std::max_element(
+          hits.begin(), hits.end(),
+          [&](BLAST_hit a, BLAST_hit b) { return a.score < b.score; });
+      best_hits.push_back(b_hit);
     }
   }
 
-  for (auto &x : all_hits) {
+  BLAST_hit b_hit = *std::max_element(
+      best_hits.begin(), best_hits.end(),
+      [&](BLAST_hit a, BLAST_hit b) { return a.score < b.score; });
+
+  for (auto &x : best_hits) {
+    if (x.score == b_hit.score)
+      bhits.push_back(x);
   }
 }
