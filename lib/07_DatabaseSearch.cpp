@@ -87,8 +87,18 @@ std::vector<BLAST_hit> find_hits_seq(
   return hits;
 }
 
-void extend_hits(const std::string &query, std::vector<BLAST_hit> &hits) {
+void extend_hits(const std::string &query, const std::string &seq,
+                 std::vector<BLAST_hit> &hits, unsigned int kmer_size) {
   for (auto &x : hits) {
+    while (x.q != query.begin() && x.b != seq.begin()) {
+      x.q--;
+      x.b--;
+    }
+
+    while (x.q + kmer_size != query.end() && x.b != seq.end()) {
+      x.q++;
+      x.e++;
+    }
   }
 }
 
@@ -116,11 +126,17 @@ void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
 
   for (auto &x : db) {
     std::vector<BLAST_hit> hits = find_hits_seq(kmers, x.second, ksize);
-    if (hits.size() != 0)
+    if (hits.size() != 0) {
+      extend_hits(query, x.second, hits, ksize);
+
+      // std::cout << x.first << " = " << hits.size() << std::endl;
+      // std::cout << x.second << std::endl;
+      // print_pattern_hits(x.second, std::string(hits[2].b, hits[2].e),
+      //                    hits[2].b);
       all_hits.push_back(hits);
+    }
   }
 
   for (auto &x : all_hits) {
-    extend_hits(query, x);
   }
 }
