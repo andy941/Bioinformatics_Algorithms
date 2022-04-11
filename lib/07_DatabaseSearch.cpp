@@ -127,14 +127,14 @@ void BLAST_db::extend_hits(const std::string &query, const std::string &seq,
 
 BLAST_db::BLAST_db(const std::string &filename_db,
                    const std::string &filename_blosum)
-    : nW{needleman_Wunsch(filename_blosum)} {
+    : sW{smith_Waterman(filename_blosum)} {
   db = read_fasta(filename_db);
   sm = read_submat(filename_blosum);
 };
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int &match,
                    const int &mismatch, const std::string &alphabet)
-    : nW{needleman_Wunsch(match, mismatch, alphabet)} {
+    : sW{smith_Waterman(match, mismatch, alphabet)} {
   db = read_fasta(filename_db);
   sm = create_submat(match, mismatch, alphabet);
 };
@@ -144,6 +144,7 @@ void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
       kmers = return_kmers(ksize, query);
   std::vector<BLAST_hit> best_hits;
   bhits = {};
+  bhits_aln = {};
 
   for (auto &x : db) {
     std::vector<BLAST_hit> hits = find_hits_seq(kmers, x, ksize);
@@ -152,6 +153,7 @@ void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
       BLAST_hit b_hit = *std::max_element(
           hits.begin(), hits.end(),
           [&](BLAST_hit a, BLAST_hit b) { return a.score < b.score; });
+      b_hit.seq = x.second;
       best_hits.push_back(b_hit);
     }
   }
@@ -160,8 +162,23 @@ void BLAST_db::find_sequence(const std::string &query, unsigned int ksize) {
       best_hits.begin(), best_hits.end(),
       [&](BLAST_hit a, BLAST_hit b) { return a.score < b.score; });
 
-  for (auto &x : best_hits) {
-    if (x.score == b_hit.score)
+  for (auto x : best_hits) {
+    if (x.score == b_hit.score) {
+      sW.align_sequences(query, x.seq, -query.size());
+      sW.trace_back();
+      x.aln = sW.aln;
       bhits.push_back(x);
+    }
   }
 }
+
+void BLAST_db::print_report() {
+  for (int i = 0; i < bhits.size(); i++) {
+    std::cout << "Sequence ID: " << bhits[i].seq_name << std::endl;
+    std::cout << "BLAST Score: " << bhits[i].score << std::endl;
+    std::cout << "Longest common sequence: " << bhits[i].aln.a.size()
+              << std::endl;
+    std::cout << std::endl;
+    bhits[i].aln.print(80);
+  }
+};

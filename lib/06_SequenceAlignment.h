@@ -95,6 +95,7 @@ struct alignment {
   alignment() = default;
   alignment(const std::string s1, const std::string s2) : a{s1}, b{s2} {};
   void print();
+  void print(unsigned int line_size);
   void add(const char &ac, const char &bc);
   void flip();
   double identity();

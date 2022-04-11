@@ -266,6 +266,39 @@ void alignment::print() {
   std::cout << "seq2: " << b << std::endl;
 };
 
+void alignment::print(unsigned int line_size) {
+
+  unsigned int beg = 0;
+  unsigned int end = line_size;
+  unsigned int aln_size = a.size();
+
+  while (beg < aln_size) {
+    if (beg + line_size > aln_size) {
+      end = aln_size;
+    }
+    for (int i = beg; i < end; i++)
+      std::cout << a[i];
+    std::cout << std::endl;
+    for (int i = beg; i < end; i++) {
+      if (a[i] == b[i])
+        std::cout << '|';
+      else if (a[i] != '-' && b[i] != '-')
+        std::cout << '*';
+      else
+        std::cout << ' ';
+    }
+    std::cout << std::endl;
+
+    for (int i = beg; i < end; i++)
+      std::cout << b[i];
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    beg += line_size;
+    end += line_size;
+  }
+}
+
 void alignment::add(const char &ac, const char &bc) {
   a.push_back(ac);
   b.push_back(bc);
