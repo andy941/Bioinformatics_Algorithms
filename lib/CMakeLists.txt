@@ -1,8 +1,10 @@
 add_library(
   lib
   "Tools.cpp"
-	"05_FindingPatterns.cpp"
+  "05_FindingPatterns.cpp"
   "06_SequenceAlignment.cpp"
   "07_DatabaseSearch.cpp"
+  "07_DatabaseSearch_exercises.cpp"
+  "07_DatabaseSearch_improved.cpp"
 )
 target_include_directories(lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
