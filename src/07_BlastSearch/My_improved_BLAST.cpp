@@ -16,7 +16,7 @@
  * 8. List all of the HSPs in the database whose score is high enough to be
  * considered.
  *
- * - I am not implementing the E-score calculation.
+ * - I am not implementing the following steps for now:
  * 1. Remove low-complexity region or sequence repeats in the query sequence.
  * 9. Evaluate the significance of the HSP score.
  * 10. Make two or more HSP regions into a longer alignment.
@@ -25,6 +25,7 @@
  * 12. Report every match whose expect score is lower than a threshold parameter
  * E.
  *
+ * I am using a threshold score of 12 for proteins.
  */
 
 using namespace std;
@@ -34,4 +35,6 @@ int main() {
   string query{"GAAGAACATCGTCATGAAGCTAACAATGGGATATGTCCTGTA"};
 
   BLAST_db db{"./data/Ath_Chr1_1-1000000_Peptide.fasta", "./data/BLOSUM62.csv"};
+  string s{'a', 'b'};
+  cout << s << endl;
 }

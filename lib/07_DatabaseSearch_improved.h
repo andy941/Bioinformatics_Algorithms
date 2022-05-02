@@ -7,11 +7,11 @@
 
 inline void print_fasta(const std::string &fasta, unsigned int linesize = 80);
 
-std::unordered_map<std::string, int> read_blosum(const std::string &file,
-                                                 std::string &alphabet);
-
 std::vector<std::pair<std::string, std::string>>
 read_fasta(const std::string &filename);
+
+std::unordered_map<std::string, int> read_blosum(const std::string &file,
+                                                 std::string &alphabet);
 
 class BLAST_db {
 
@@ -22,8 +22,9 @@ class BLAST_db {
   std::string letters;
 
 private:
+  int match_score(std::string &s);
   std::unordered_map<std::string, std::vector<unsigned int>>
-  extract_kmers(const std::string &seq);
+  extract_kmers(const std::string seq);
 
 public:
   BLAST_db() = delete;

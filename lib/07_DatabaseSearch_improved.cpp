@@ -47,7 +47,7 @@ std::unordered_map<std::string, int> read_blosum(const std::string &file,
   return submat;
 };
 
-inline void print_fasta(const std::string &fasta, unsigned int linesize) {
+void print_fasta(const std::string &fasta, unsigned int linesize) {
   int limit = 0;
   for (auto &x : fasta) {
     if (limit < linesize) {
@@ -88,6 +88,17 @@ read_fasta(const std::string &filename) {
   return fa_seqs;
 };
 
+int BLAST_db::match_score(std::string &s) {
+  int score{0};
+
+  for (auto c_it = s.begin(); c_it < s.end(); c_it++) {
+    std::string s{*c_it, *c_it};
+    score += sm[s];
+  }
+
+  return score;
+}
+
 // BLAST_db -----------------------------------------------------------------
 
 BLAST_db::BLAST_db(const std::string &filename_db,
@@ -95,6 +106,7 @@ BLAST_db::BLAST_db(const std::string &filename_db,
     : kmer_size{k} {
   db = read_fasta(filename_db);
   sm = read_blosum(filename_blosum, letters);
+  extract_kmers(db[0].second);
 };
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int match,
@@ -107,18 +119,27 @@ BLAST_db::BLAST_db(const std::string &filename_db, const int match,
 };
 
 std::unordered_map<std::string, std::vector<unsigned int>>
-BLAST_db::extract_kmers(const std::string &seq) {
+BLAST_db::extract_kmers(const std::string seq) {
 
   std::unordered_map<std::string, std::vector<unsigned int>> kmers;
-  kmers.reserve(seq.size());
+  kmers.reserve(kmer_size * letters.size());
 
   for (unsigned int i = 0; i <= seq.size() - kmer_size; i++) {
     std::string ks = seq.substr(i, kmer_size);
-    auto pks = kmers.find(ks);
-    if (pks == kmers.end())
-      kmers[ks] = std::vector<unsigned int>{i};
-    else
-      kmers[ks].push_back(i);
+    for (auto c_it = ks.begin(); c_it < ks.end(); c_it++) {
+      char c_orig = *c_it;
+      for (auto &l : letters) {
+        *c_it = l;
+        if (match_score(ks) > 12) {
+          auto pks = kmers.find(ks);
+          if (pks == kmers.end())
+            kmers[ks] = std::vector<unsigned int>{i};
+          else
+            kmers[ks].push_back(i);
+        }
+      }
+      *c_it = c_orig;
+    }
   }
 
   return kmers;
