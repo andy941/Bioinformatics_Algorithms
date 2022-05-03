@@ -2,6 +2,7 @@
 #include "Tools.h"
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <numeric>
 #include <ostream>
 #include <sstream>
@@ -106,8 +107,7 @@ BLAST_db::BLAST_db(const std::string &filename_db,
     : kmer_size{k} {
   db = read_fasta(filename_db);
   sm = read_blosum(filename_blosum, letters);
-  extract_kmers(db[0].second);
-};
+}
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int match,
                    const int mismatch, const std::string &alphabet,
@@ -122,7 +122,7 @@ std::unordered_map<std::string, std::vector<unsigned int>>
 BLAST_db::extract_kmers(const std::string seq) {
 
   std::unordered_map<std::string, std::vector<unsigned int>> kmers;
-  kmers.reserve(kmer_size * letters.size());
+  kmers.reserve(pow(letters.size(), kmer_size));
 
   for (unsigned int i = 0; i <= seq.size() - kmer_size; i++) {
     std::string ks = seq.substr(i, kmer_size);
@@ -141,6 +141,23 @@ BLAST_db::extract_kmers(const std::string seq) {
       *c_it = c_orig;
     }
   }
-
   return kmers;
 };
+
+void BLAST_db::print_kmers(
+    std::unordered_map<std::string, std::vector<unsigned int>> &mat) {
+  for (auto &x : mat) {
+    std::cout << x.first << " = ";
+    for (auto &y : x.second) {
+      std::cout << y << ", ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "size = " << mat.size()
+            << " max_size = " << pow(kmer_size, letters.size()) << std::endl;
+}
+
+void BLAST_db::blast_sequence(std::string &seq) {
+  auto mat = extract_kmers(seq);
+  print_kmers(mat);
+}

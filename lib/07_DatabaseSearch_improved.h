@@ -25,6 +25,8 @@ private:
   int match_score(std::string &s);
   std::unordered_map<std::string, std::vector<unsigned int>>
   extract_kmers(const std::string seq);
+  void
+  print_kmers(std::unordered_map<std::string, std::vector<unsigned int>> &mat);
 
 public:
   BLAST_db() = delete;
@@ -32,4 +34,7 @@ public:
            unsigned int k = 3);
   BLAST_db(const std::string &filename_db, const int match, const int mismatch,
            const std::string &alphabet, unsigned int k = 11);
+
+public:
+  void blast_sequence(std::string &seq);
 };

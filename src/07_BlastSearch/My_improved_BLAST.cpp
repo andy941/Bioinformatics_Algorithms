@@ -6,10 +6,10 @@
 /*
  * - Overview of the implemented algorithm (see:
  * https://en.wikipedia.org/wiki/BLAST_(biotechnology)#Process) .
- * 2. Make a k-letter word list of the query sequence.
- * 3. List the possible matching words.
- * 4. Organize the remaining high-scoring words into an efficient search tree.
- * 5. Repeat 3-4 for each k-letter word in the query sequence
+ * X 2. Make a k-letter word list of the query sequence.
+ * X 3. List the possible matching words.
+ * X 4. Organize the remaining high-scoring words into an efficient search tree.
+ * X 5. Repeat 3-4 for each k-letter word in the query sequence
  * 6. Scan the database sequences for exact matches with the remaining
  * high-scoring words.
  * 7. Extend the exact matches to high-scoring segment pair (HSP).
@@ -35,6 +35,5 @@ int main() {
   string query{"GAAGAACATCGTCATGAAGCTAACAATGGGATATGTCCTGTA"};
 
   BLAST_db db{"./data/Ath_Chr1_1-1000000_Peptide.fasta", "./data/BLOSUM62.csv"};
-  string s{'a', 'b'};
-  cout << s << endl;
+  db.blast_sequence(query);
 }
