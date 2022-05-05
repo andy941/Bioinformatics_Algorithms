@@ -2,5 +2,5 @@
 .cache
 build
 .DS_Store
-ext/**
+ext/
 

@@ -6,4 +6,9 @@ add_library(
   "07_DatabaseSearch.cpp"
   "07_DatabaseSearch_improved.cpp"
 )
-target_include_directories(lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+  lib
+  PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/ext/Eigen/"
+)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "06_SequenceAlignment.h"
+#include <Eigen/Core>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,6 +28,9 @@ private:
   extract_kmers(const std::string seq);
   void
   print_kmers(std::unordered_map<std::string, std::vector<unsigned int>> &mat);
+  Eigen::Matrix2i
+  find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
+            std::string &seq);
 
 public:
   BLAST_db() = delete;

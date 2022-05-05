@@ -22,7 +22,7 @@ std::unordered_map<std::string, int> read_blosum(const std::string &file,
   std::string header_line;
   getline(ifs, header_line);
   for (auto &x : header_line) {
-    if (isalpha(x))
+    if (x != ',')
       header.push_back(x);
   }
 
@@ -130,12 +130,13 @@ BLAST_db::extract_kmers(const std::string seq) {
       char c_orig = *c_it;
       for (auto &l : letters) {
         *c_it = l;
-        if (match_score(ks) > 12) {
+        if (match_score(ks) > 16) {
+          // std::cout << ks << " = " << match_score(ks) << std::endl;
           auto pks = kmers.find(ks);
           if (pks == kmers.end())
             kmers[ks] = std::vector<unsigned int>{i};
           else
-            kmers[ks].push_back(i);
+            pks->second.push_back(i);
         }
       }
       *c_it = c_orig;
@@ -155,9 +156,15 @@ void BLAST_db::print_kmers(
   }
   std::cout << "size = " << mat.size()
             << " max_size = " << pow(kmer_size, letters.size()) << std::endl;
+  std::cout << "letter space = " << letters << " (" << letters.size() << ")"
+            << std::endl;
 }
+
+Eigen::Matrix2i
+find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
+          std::string &seq) {}
 
 void BLAST_db::blast_sequence(std::string &seq) {
   auto mat = extract_kmers(seq);
-  print_kmers(mat);
+  // print_kmers(mat);
 }
