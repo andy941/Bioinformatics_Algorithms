@@ -32,7 +32,7 @@ using namespace std;
 
 int main() {
   // AT1G02750.2
-  string query{"GAAGAACATCGTCATGAAGCTAACAATGGGATATGTCCTGTA"};
+  string query{"RPKVYRHVLYNAINPATVNIQVLIGVLSANAAF"};
 
   BLAST_db db{"./data/Ath_Chr1_1-1000000_Peptide.fasta", "./data/BLOSUM62.csv"};
   db.blast_sequence(query);

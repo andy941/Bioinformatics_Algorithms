@@ -18,8 +18,12 @@ class BLAST_db {
 
   std::vector<std::pair<std::string, std::string>> db;
   std::unordered_map<std::string, int> sm;
+  std::unordered_map<std::string,
+                     std::pair<unsigned int, std::vector<unsigned int>>>
+      kmers;
   std::vector<alignment> bhits_aln;
   unsigned int kmer_size{0};
+  unsigned int min_score{0};
   std::string letters;
 
 private:
@@ -28,16 +32,17 @@ private:
   extract_kmers(const std::string seq);
   void
   print_kmers(std::unordered_map<std::string, std::vector<unsigned int>> &mat);
-  Eigen::Matrix2i
+  Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic>
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
-            std::string &seq);
+            std::string &seq, unsigned int len_db_seq);
 
 public:
   BLAST_db() = delete;
   BLAST_db(const std::string &filename_db, const std::string filename_blosum,
-           unsigned int k = 3);
+           unsigned int k = 3, unsigned int ms = 12);
   BLAST_db(const std::string &filename_db, const int match, const int mismatch,
-           const std::string &alphabet, unsigned int k = 11);
+           const std::string &alphabet, unsigned int k = 11,
+           unsigned int ms = 4);
 
 public:
   void blast_sequence(std::string &seq);

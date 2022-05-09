@@ -1,4 +1,6 @@
 #include "07_DatabaseSearch_improved.h"
+#include "Eigen/src/Core/Matrix.h"
+#include "Eigen/src/Core/util/Constants.h"
 #include "Tools.h"
 #include <algorithm>
 #include <fstream>
@@ -72,16 +74,18 @@ read_fasta(const std::string &filename) {
     std::cerr << "Can't find file!" << std::endl;
 
   for (std::string line; !ifs.eof(); getline(ifs, line)) {
-    std::istringstream iss{line};
-    char c;
-    iss >> c;
-    if (c == '>' && name != "") {
+    if (line == "")
+      continue;
+    if (name == "") {
+      std::cout << line << std::endl;
+      name = std::string{line.begin() + 1, line.end()};
+      continue;
+    }
+    char c = line[0];
+    if (c == '>') {
       fa_seqs.push_back(std::make_pair(name, seq));
-      name = "";
+      name = std::string{line.begin() + 1, line.end()};
       seq = "";
-    } else if (c == '>') {
-      getline(iss, name);
-
     } else {
       seq += line;
     }
@@ -103,16 +107,17 @@ int BLAST_db::match_score(std::string &s) {
 // BLAST_db -----------------------------------------------------------------
 
 BLAST_db::BLAST_db(const std::string &filename_db,
-                   const std::string filename_blosum, unsigned int k)
-    : kmer_size{k} {
+                   const std::string filename_blosum, unsigned int k,
+                   unsigned int ms)
+    : kmer_size{k}, min_score(ms) {
   db = read_fasta(filename_db);
   sm = read_blosum(filename_blosum, letters);
 }
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int match,
                    const int mismatch, const std::string &alphabet,
-                   unsigned int k)
-    : kmer_size{k} {
+                   unsigned int k, unsigned int ms)
+    : kmer_size{k}, min_score(ms) {
   db = read_fasta(filename_db);
   sm = create_submat(match, mismatch, alphabet);
   letters = alphabet;
@@ -130,8 +135,7 @@ BLAST_db::extract_kmers(const std::string seq) {
       char c_orig = *c_it;
       for (auto &l : letters) {
         *c_it = l;
-        if (match_score(ks) > 16) {
-          // std::cout << ks << " = " << match_score(ks) << std::endl;
+        if (match_score(ks) > min_score) {
           auto pks = kmers.find(ks);
           if (pks == kmers.end())
             kmers[ks] = std::vector<unsigned int>{i};
@@ -160,11 +164,37 @@ void BLAST_db::print_kmers(
             << std::endl;
 }
 
-Eigen::Matrix2i
-find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
-          std::string &seq) {}
+Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> BLAST_db::find_hits(
+    std::unordered_map<std::string, std::vector<unsigned int>> &kmers,
+    std::string &seq, unsigned int len_query) {
 
-void BLAST_db::blast_sequence(std::string &seq) {
-  auto mat = extract_kmers(seq);
+  Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> hmat(
+      len_query, seq.length());
+
+  for (auto i = 0; i <= seq.size() - kmer_size; i++) {
+    std::string ks{seq.begin() + i, seq.begin() + i + kmer_size};
+    auto pks = kmers.find(ks);
+    if (pks != kmers.end()) {
+      for (auto &qhit : pks->second) {
+        hmat(qhit, i) = true;
+      }
+    }
+  }
+  return hmat;
+}
+
+void BLAST_db::blast_sequence(std::string &query) {
+  auto kmers_map = extract_kmers(query);
+  std::string db_seq_name = db[11].first;
+  std::string db_seq = db[11].second;
+  auto hits_mat = find_hits(kmers_map, db_seq, query.size());
+  std::cout << hits_mat << std::endl;
+  std::cout << hits_mat.size() << " == " << query.size() * db_seq.size()
+            << std::endl;
+  std::cout << "ID = " << db_seq_name << std::endl;
+  std::cout << db_seq << std::endl;
+  std::cout << "Query" << std::endl;
+  std::cout << query << std::endl;
+
   // print_kmers(mat);
 }
