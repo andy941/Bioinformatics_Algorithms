@@ -93,11 +93,13 @@ read_fasta(const std::string &filename) {
   return fa_seqs;
 };
 
-int BLAST_db::match_score(std::string &s) {
+int BLAST_db::match_score(const std::string &s1, const std::string &s2) {
   int score{0};
+  if (s1.size() != s2.size())
+    std::cerr << "Strings not the same length in match_score()";
 
-  for (auto c_it = s.begin(); c_it < s.end(); c_it++) {
-    std::string s{*c_it, *c_it};
+  for (int i = 0; i < s1.size(); i++) {
+    std::string s{s1[i], s2[i]};
     score += sm[s];
   }
 
@@ -127,19 +129,22 @@ std::unordered_map<std::string, std::vector<unsigned int>>
 BLAST_db::extract_kmers(const std::string seq) {
 
   std::unordered_map<std::string, std::vector<unsigned int>> kmers;
-  kmers.reserve(pow(letters.size(), kmer_size));
+  kmers.reserve(letters.size() * kmer_size * query_sequence.size());
 
   for (unsigned int i = 0; i <= seq.size() - kmer_size; i++) {
     std::string ks = seq.substr(i, kmer_size);
+    std::string ks_orig = ks;
     for (auto c_it = ks.begin(); c_it < ks.end(); c_it++) {
       char c_orig = *c_it;
       for (auto &l : letters) {
         *c_it = l;
-        if (match_score(ks) > min_score) {
+        if (match_score(ks, ks_orig) > min_score) {
+          std::cout << ks << " " << ks_orig << " " << match_score(ks, ks_orig)
+                    << std::endl;
           auto pks = kmers.find(ks);
           if (pks == kmers.end())
             kmers[ks] = std::vector<unsigned int>{i};
-          else
+          else if (pks->second.back() != i)
             pks->second.push_back(i);
         }
       }
@@ -158,8 +163,8 @@ void BLAST_db::print_kmers(
     }
     std::cout << std::endl;
   }
-  std::cout << "size = " << mat.size()
-            << " max_size = " << pow(kmer_size, letters.size()) << std::endl;
+  std::cout << "size = " << mat.size() << " max_size = "
+            << kmer_size * letters.size() * query_sequence.size() << std::endl;
   std::cout << "letter space = " << letters << " (" << letters.size() << ")"
             << std::endl;
 }
@@ -184,17 +189,18 @@ Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> BLAST_db::find_hits(
 }
 
 void BLAST_db::blast_sequence(std::string &query) {
+  query_sequence = query;
   auto kmers_map = extract_kmers(query);
   std::string db_seq_name = db[11].first;
   std::string db_seq = db[11].second;
   auto hits_mat = find_hits(kmers_map, db_seq, query.size());
-  std::cout << hits_mat << std::endl;
-  std::cout << hits_mat.size() << " == " << query.size() * db_seq.size()
-            << std::endl;
-  std::cout << "ID = " << db_seq_name << std::endl;
-  std::cout << db_seq << std::endl;
-  std::cout << "Query" << std::endl;
-  std::cout << query << std::endl;
+  // std::cout << hits_mat << std::endl;
+  // std::cout << hits_mat.size() << " == " << query.size() * db_seq.size()
+  //           << std::endl;
+  // std::cout << "ID = " << db_seq_name << std::endl;
+  // std::cout << db_seq << std::endl;
+  // std::cout << "Query" << std::endl;
+  // std::cout << query << std::endl;
 
-  // print_kmers(mat);
+  print_kmers(kmers_map);
 }

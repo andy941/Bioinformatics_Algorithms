@@ -25,9 +25,10 @@ class BLAST_db {
   unsigned int kmer_size{0};
   unsigned int min_score{0};
   std::string letters;
+  std::string query_sequence;
 
 private:
-  int match_score(std::string &s);
+  int match_score(const std::string &s1, const std::string &s2);
   std::unordered_map<std::string, std::vector<unsigned int>>
   extract_kmers(const std::string seq);
   void
