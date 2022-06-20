@@ -77,7 +77,6 @@ read_fasta(const std::string &filename) {
     if (line == "")
       continue;
     if (name == "") {
-      std::cout << line << std::endl;
       name = std::string{line.begin() + 1, line.end()};
       continue;
     }
@@ -139,8 +138,6 @@ BLAST_db::extract_kmers(const std::string seq) {
       for (auto &l : letters) {
         *c_it = l;
         if (match_score(ks, ks_orig) > min_score) {
-          std::cout << ks << " " << ks_orig << " " << match_score(ks, ks_orig)
-                    << std::endl;
           auto pks = kmers.find(ks);
           if (pks == kmers.end())
             kmers[ks] = std::vector<unsigned int>{i};
@@ -169,12 +166,12 @@ void BLAST_db::print_kmers(
             << std::endl;
 }
 
-Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> BLAST_db::find_hits(
+Matrix_hits BLAST_db::find_hits(
     std::unordered_map<std::string, std::vector<unsigned int>> &kmers,
     std::string &seq, unsigned int len_query) {
 
-  Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> hmat(
-      len_query, seq.length());
+  Matrix_hits hmat(len_query, seq.length());
+  hmat = Matrix_hits::Zero(len_query, seq.length());
 
   for (auto i = 0; i <= seq.size() - kmer_size; i++) {
     std::string ks{seq.begin() + i, seq.begin() + i + kmer_size};
@@ -188,19 +185,25 @@ Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic> BLAST_db::find_hits(
   return hmat;
 }
 
+BLAST_hit BLAST_db::get_HSP(const Matrix_hits &hmat,
+                            const std::pair<std::string, std::string> &seq,
+                            const unsigned int dist) {
+  BLAST_hit hit;
+  int qhead = 1 - query_sequence.size();
+
+  while (qhead++ < seq.second.size()) {
+  }
+  return hit;
+};
+
 void BLAST_db::blast_sequence(std::string &query) {
+  std::vector<BLAST_hit> hits;
   query_sequence = query;
   auto kmers_map = extract_kmers(query);
-  std::string db_seq_name = db[11].first;
-  std::string db_seq = db[11].second;
+  std::string db_seq_name = db[3].first;
+  std::string db_seq = db[3].second;
   auto hits_mat = find_hits(kmers_map, db_seq, query.size());
-  // std::cout << hits_mat << std::endl;
-  // std::cout << hits_mat.size() << " == " << query.size() * db_seq.size()
-  //           << std::endl;
-  // std::cout << "ID = " << db_seq_name << std::endl;
-  // std::cout << db_seq << std::endl;
-  // std::cout << "Query" << std::endl;
-  // std::cout << query << std::endl;
+  hits.push_back(get_HSP(hits_mat, db[3], 0));
 
-  print_kmers(kmers_map);
+  std::cout << hits_mat << std::endl;
 }
