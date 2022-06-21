@@ -31,9 +31,9 @@
 using namespace std;
 
 int main() {
-  //>AT1G01060.3
-  string query{"KARKPYTITKQRER"};
+  // AT1G02750.2
+  string query{"RPKVYRHVLYNAINPATVNIQVLIGVLSANAAF"};
 
-  BLAST_db db{"./data/Ath_small-test_BLAST_pep.fasta", "./data/BLOSUM62.csv"};
+  BLAST_db db{"./data/Ath_Chr1_1-1000000_Peptide.fasta", "./data/BLOSUM62.csv"};
   db.blast_sequence(query);
 }
