@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
+typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> Matrix_hits;
+
 inline void print_fasta(const std::string &fasta, unsigned int linesize = 80);
 
 std::vector<std::pair<std::string, std::string>>
@@ -13,6 +15,17 @@ read_fasta(const std::string &filename);
 
 std::unordered_map<std::string, int> read_blosum(const std::string &file,
                                                  std::string &alphabet);
+
+struct BLAST_hit {
+  unsigned int qstart{0};
+  unsigned int seq_start{0};
+  unsigned int length{0};
+  std::string seq_name;
+  alignment aln;
+  unsigned int identity{0};
+  unsigned int E_score{0};
+  BLAST_hit() = default;
+};
 
 class BLAST_db {
 
@@ -33,9 +46,12 @@ private:
   extract_kmers(const std::string seq);
   void
   print_kmers(std::unordered_map<std::string, std::vector<unsigned int>> &mat);
-  Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic>
+  Matrix_hits
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
             std::string &seq, unsigned int len_db_seq);
+  BLAST_hit get_HSP(const Matrix_hits &hmat,
+                    const std::pair<std::string, std::string> &seq,
+                    const unsigned int dist);
 
 public:
   BLAST_db() = delete;
