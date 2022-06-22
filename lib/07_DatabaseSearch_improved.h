@@ -17,14 +17,16 @@ std::unordered_map<std::string, int> read_blosum(const std::string &file,
                                                  std::string &alphabet);
 
 struct BLAST_hit {
-  unsigned int qstart{0};
+  unsigned int query_start{0};
   unsigned int seq_start{0};
   unsigned int length{0};
   std::string seq_name;
   alignment aln;
-  unsigned int identity{0};
+  unsigned int score{0};
   unsigned int E_score{0};
   BLAST_hit() = default;
+  BLAST_hit(unsigned int qs, unsigned int ss, unsigned int l, std::string sn)
+      : query_start{qs}, seq_start{ss}, length{l}, seq_name{sn} {};
 };
 
 class BLAST_db {
@@ -49,9 +51,10 @@ private:
   Matrix_hits
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
             std::string &seq, unsigned int len_db_seq);
-  BLAST_hit get_HSP(const Matrix_hits &hmat,
-                    const std::pair<std::string, std::string> &seq,
-                    const unsigned int dist);
+  void collapse_hits(Matrix_hits &hmat);
+  std::vector<BLAST_hit> get_HSP(const Matrix_hits &hmat,
+                                 const std::pair<std::string, std::string> &seq,
+                                 const unsigned int dist);
 
 public:
   BLAST_db() = delete;

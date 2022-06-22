@@ -10,7 +10,7 @@
  * X 3. List the possible matching words.
  * X 4. Organize the remaining high-scoring words into an efficient search tree.
  * X 5. Repeat 3-4 for each k-letter word in the query sequence
- * 6. Scan the database sequences for exact matches with the remaining
+ * X 6. Scan the database sequences for exact matches with the remaining
  * high-scoring words.
  * 7. Extend the exact matches to high-scoring segment pair (HSP).
  * 8. List all of the HSPs in the database whose score is high enough to be
@@ -32,7 +32,7 @@ using namespace std;
 
 int main() {
   //>AT1G01060.3
-  string query{"KARKPYTITKQRER"};
+  string query{"TSGEELLAELLAKA"};
 
   BLAST_db db{"./data/Ath_small-test_BLAST_pep.fasta", "./data/BLOSUM62.csv"};
   db.blast_sequence(query);
