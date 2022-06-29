@@ -51,10 +51,13 @@ private:
   Matrix_hits
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
             std::string &seq, unsigned int len_db_seq);
-  void collapse_hits(Matrix_hits &hmat);
-  std::vector<BLAST_hit> get_HSP(const Matrix_hits &hmat,
+  std::vector<BLAST_hit>
+  collapse_hits(Matrix_hits &hmat,
+                const std::pair<std::string, std::string> &seq,
+                const unsigned int collapse_limit);
+  std::vector<BLAST_hit> get_HSP(Matrix_hits &hmat,
                                  const std::pair<std::string, std::string> &seq,
-                                 const unsigned int dist);
+                                 const unsigned int collapse_limit);
 
 public:
   BLAST_db() = delete;

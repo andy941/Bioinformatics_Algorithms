@@ -184,46 +184,59 @@ Matrix_hits BLAST_db::find_hits(
   }
   return hmat;
 }
-
 std::vector<BLAST_hit>
-BLAST_db::get_HSP(const Matrix_hits &hmat,
-                  const std::pair<std::string, std::string> &seq,
-                  const unsigned int dist) {
+BLAST_db::collapse_hits(Matrix_hits &hmat,
+                        const std::pair<std::string, std::string> &seq,
+                        const unsigned int collapse_limit) {
 
   std::vector<BLAST_hit> hits;
 
   int qstart = 0;
   int sstart = 0;
   unsigned int length = 0;
-  unsigned int collapse_limit =
-      kmer_size; // how far apart can hits be to be considered as one.
+  unsigned int nohit_length = 0;
 
   for (unsigned int i = 0; i < seq.second.size(); i++) {
     unsigned int j = 0;
     qstart = j;
     sstart = i;
+    length = nohit_length = 0;
 
     while (j < query_sequence.size() && j + i < seq.second.size()) {
       const bool b = hmat(j, j + i);
 
-      if (b == true) {
-        if (length == 0) {
-          qstart = j + i;
-          sstart = j;
-          length++;
-        } else if (j - qstart - length <= collapse_limit) {
-          length = j - qstart + 1;
-        }
+      if (b == true && length == 0) {
+        qstart = j;
+        sstart = j + i;
+        nohit_length = 0;
       }
+      length += b;
+      nohit_length += !b;
+      nohit_length *= !b;
 
-      if (j - qstart - length > collapse_limit && length != 0) {
-        hits.push_back(BLAST_hit(qstart, sstart, length, seq.first));
+      if (nohit_length > collapse_limit && length != 0) {
+        hits.push_back(BLAST_hit(qstart, sstart, j - qstart - nohit_length + 1,
+                                 seq.first));
+        nohit_length = 0;
         length = 0;
       }
-
       j++;
     }
+    if (length != 0) {
+      hits.push_back(
+          BLAST_hit(qstart, sstart, j - qstart - nohit_length, seq.first));
+    }
   }
+
+  return hits;
+}
+
+std::vector<BLAST_hit>
+BLAST_db::get_HSP(Matrix_hits &hmat,
+                  const std::pair<std::string, std::string> &seq,
+                  const unsigned int collapse_limit) {
+
+  std::vector<BLAST_hit> hits = collapse_hits(hmat, seq, collapse_limit);
 
   return hits;
 }
@@ -235,7 +248,7 @@ void BLAST_db::blast_sequence(std::string &query) {
   std::string db_seq_name = db[3].first;
   std::string db_seq = db[3].second;
   auto hits_mat = find_hits(kmers_map, db_seq, query.size());
-  hits = get_HSP(hits_mat, db[3], 0);
+  hits = get_HSP(hits_mat, db[3], 3);
 
   std::cout << hits_mat << std::endl;
 }
