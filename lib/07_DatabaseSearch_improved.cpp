@@ -185,12 +185,12 @@ Matrix_hits BLAST_db::find_hits(
   return hmat;
 }
 std::vector<BLAST_hit>
-BLAST_db::collapse_hits(Matrix_hits &hmat,
-                        const std::pair<std::string, std::string> &seq,
+BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
                         const unsigned int collapse_limit) {
 
   std::vector<BLAST_hit> hits;
 
+  auto &seq = db[db_position];
   int qstart = 0;
   int sstart = 0;
   unsigned int length = 0;
@@ -216,7 +216,7 @@ BLAST_db::collapse_hits(Matrix_hits &hmat,
 
       if (nohit_length > collapse_limit && length != 0) {
         hits.push_back(BLAST_hit(qstart, sstart, j - qstart - nohit_length + 1,
-                                 seq.first));
+                                 db_position));
         nohit_length = 0;
         length = 0;
       }
@@ -224,19 +224,25 @@ BLAST_db::collapse_hits(Matrix_hits &hmat,
     }
     if (length != 0) {
       hits.push_back(
-          BLAST_hit(qstart, sstart, j - qstart - nohit_length, seq.first));
+          BLAST_hit(qstart, sstart, j - qstart - nohit_length, db_position));
     }
   }
 
   return hits;
 }
 
-std::vector<BLAST_hit>
-BLAST_db::get_HSP(Matrix_hits &hmat,
-                  const std::pair<std::string, std::string> &seq,
-                  const unsigned int collapse_limit) {
+void BLAST_db::extend_hits(std::vector<BLAST_hit> hits) {
+  for (auto &hit : hits) {
+  }
+}
 
-  std::vector<BLAST_hit> hits = collapse_hits(hmat, seq, collapse_limit);
+std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
+                                         const unsigned int db_position,
+                                         const unsigned int collapse_limit) {
+
+  std::vector<BLAST_hit> hits =
+      collapse_hits(hmat, db_position, collapse_limit);
+  extend_hits(hits);
 
   return hits;
 }
@@ -248,7 +254,7 @@ void BLAST_db::blast_sequence(std::string &query) {
   std::string db_seq_name = db[3].first;
   std::string db_seq = db[3].second;
   auto hits_mat = find_hits(kmers_map, db_seq, query.size());
-  hits = get_HSP(hits_mat, db[3], 3);
+  hits = get_HSP(hits_mat, 3, 3);
 
   std::cout << hits_mat << std::endl;
 }

@@ -20,13 +20,13 @@ struct BLAST_hit {
   unsigned int query_start{0};
   unsigned int seq_start{0};
   unsigned int length{0};
-  std::string seq_name;
+  unsigned int db_position{0};
   alignment aln;
   unsigned int score{0};
   unsigned int E_score{0};
   BLAST_hit() = default;
-  BLAST_hit(unsigned int qs, unsigned int ss, unsigned int l, std::string sn)
-      : query_start{qs}, seq_start{ss}, length{l}, seq_name{sn} {};
+  BLAST_hit(unsigned int qs, unsigned int ss, unsigned int l, unsigned int dp)
+      : query_start{qs}, seq_start{ss}, length{l}, db_position{dp} {};
 };
 
 class BLAST_db {
@@ -51,12 +51,11 @@ private:
   Matrix_hits
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
             std::string &seq, unsigned int len_db_seq);
-  std::vector<BLAST_hit>
-  collapse_hits(Matrix_hits &hmat,
-                const std::pair<std::string, std::string> &seq,
-                const unsigned int collapse_limit);
-  std::vector<BLAST_hit> get_HSP(Matrix_hits &hmat,
-                                 const std::pair<std::string, std::string> &seq,
+  std::vector<BLAST_hit> collapse_hits(Matrix_hits &hmat,
+                                       const unsigned int db_position,
+                                       const unsigned int collapse_limit);
+  void extend_hits(std::vector<BLAST_hit> hits);
+  std::vector<BLAST_hit> get_HSP(Matrix_hits &hmat, unsigned int db_position,
                                  const unsigned int collapse_limit);
 
 public:
