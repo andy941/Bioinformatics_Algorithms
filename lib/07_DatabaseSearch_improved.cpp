@@ -1,4 +1,5 @@
 #include "07_DatabaseSearch_improved.h"
+#include "06_SequenceAlignment.h"
 #include "Eigen/src/Core/Matrix.h"
 #include "Eigen/src/Core/util/Constants.h"
 #include "Tools.h"
@@ -234,6 +235,25 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
 
 void BLAST_db::extend_hits(std::vector<BLAST_hit> hits) {
   for (auto &hit : hits) {
+    auto &seq = db[hit.db_position];
+    while (hit.query_start - 1 >= 0 && hit.seq_start - 1 >= 0) {
+      char c1 = query_sequence[hit.query_start - 1];
+      char c2 = seq.second[hit.seq_start - 1];
+      if (score_pos(c1, c2, sm, 0) < 0) {
+        break;
+      }
+      hit.query_start--;
+      hit.seq_start--;
+      hit.length++;
+    }
+    while (hit.length + 1 <= query_sequence.length() &&
+           hit.length + 1 <= seq.second.length()) {
+      if (score_pos(query_sequence[hit.length], seq.second[hit.length], sm, 0) <
+          0) {
+        break;
+      }
+      hit.length++;
+    }
   }
 }
 
@@ -243,7 +263,7 @@ std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
 
   std::vector<BLAST_hit> hits =
       collapse_hits(hmat, db_position, collapse_limit);
-  extend_hits(hits);
+  // extend_hits(hits);
 
   return hits;
 }
