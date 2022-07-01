@@ -217,7 +217,7 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
 
       if (nohit_length > collapse_limit && length != 0) {
         hits.push_back(BLAST_hit(qstart, sstart,
-                                 j - qstart - nohit_length + 1 + kmer_size,
+                                 j - qstart - nohit_length + kmer_size,
                                  db_position));
         nohit_length = 0;
         length = 0;
@@ -225,8 +225,9 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
       j++;
     }
     if (length != 0) {
-      hits.push_back(BLAST_hit(
-          qstart, sstart, j - qstart - nohit_length + kmer_size, db_position));
+      hits.push_back(BLAST_hit(qstart, sstart,
+                               j - qstart - nohit_length + kmer_size - 1,
+                               db_position));
     }
   }
 
