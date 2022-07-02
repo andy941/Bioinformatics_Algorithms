@@ -273,30 +273,34 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
   return hits;
 }
 
+// Keep extending until the running value of the score dips below 0.
 void BLAST_db::extend_hits(std::vector<BLAST_hit> hits) {
   for (auto &hit : hits) {
+    int score = match_score(query_sequence[], const std::string &s2);
     auto &seq = db[hit.db_position];
     while (hit.query_start > 0 && hit.seq_start > 0) {
       char c1 = query_sequence[hit.query_start - 1];
       char c2 = seq.second[hit.seq_start - 1];
-      if (score_pos(c1, c2, sm, 0) < 0) {
+      if (score += score_pos(c1, c2, sm, 0) < 0) {
         break;
       }
       hit.query_start--;
       hit.seq_start--;
       hit.length++;
     }
+    score = 0;
     while (hit.length + hit.query_start < query_sequence.length() &&
            hit.length + hit.seq_start < seq.second.length()) {
       char c1 = query_sequence[hit.query_start + hit.length];
       char c2 = seq.second[hit.seq_start + hit.length];
-      if (score_pos(c1, c2, sm, 0) < 0) {
+      if (score += score_pos(c1, c2, sm, 0) < 0) {
         break;
       }
       hit.length++;
     }
   }
 }
+void BLAST_db::compute_Escore(BLAST_hit &hit) {}
 
 std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
                                          const unsigned int db_position,

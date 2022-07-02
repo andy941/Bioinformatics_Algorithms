@@ -22,8 +22,8 @@ struct BLAST_hit {
   unsigned int length{0};
   unsigned int db_position{0};
   alignment aln;
-  unsigned int score{0};
-  unsigned int E_score{0};
+  double E_score{0};
+
   BLAST_hit() = default;
   BLAST_hit(unsigned int qs, unsigned int ss, unsigned int l, unsigned int dp)
       : query_start{qs}, seq_start{ss}, length{l}, db_position{dp} {};
@@ -57,6 +57,7 @@ private:
   void extend_hits(std::vector<BLAST_hit> hits);
   std::vector<BLAST_hit> get_HSP(Matrix_hits &hmat, unsigned int db_position,
                                  const unsigned int collapse_limit);
+  void compute_Escore(BLAST_hit &hit);
 
 public:
   BLAST_db() = delete;
