@@ -32,7 +32,7 @@ using namespace std;
 
 int main() {
   // >AT1G01060.3
-  string query{"TSGEELLAELLAKA"};
+  string query{"MDTSGEELLAELLAKA"};
 
   BLAST_db db{"./data/Ath_small-test_BLAST_pep.fasta", "./data/BLOSUM62.csv"};
   db.blast_sequence(query);

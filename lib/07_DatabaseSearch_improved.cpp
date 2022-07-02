@@ -169,13 +169,17 @@ void BLAST_db::print_kmers(
 
 Matrix_hits BLAST_db::find_hits(
     std::unordered_map<std::string, std::vector<unsigned int>> &kmers,
-    std::string &seq, unsigned int len_query) {
+    const unsigned int db_position) {
 
-  Matrix_hits hmat(len_query, seq.length());
-  hmat = Matrix_hits::Zero(len_query, seq.length());
+  auto &seq = db[db_position];
+  unsigned int rows = query_sequence.size() - kmer_size + 1;
+  unsigned int cols = seq.second.size() - kmer_size + 1;
 
-  for (auto i = 0; i <= seq.size() - kmer_size; i++) {
-    std::string ks{seq.begin() + i, seq.begin() + i + kmer_size};
+  Matrix_hits hmat(rows, cols);
+  hmat = Matrix_hits::Zero(rows, cols);
+
+  for (auto i = 0; i < cols; i++) {
+    std::string ks{seq.second.begin() + i, seq.second.begin() + i + kmer_size};
     auto pks = kmers.find(ks);
     if (pks != kmers.end()) {
       for (auto &qhit : pks->second) {
@@ -185,6 +189,7 @@ Matrix_hits BLAST_db::find_hits(
   }
   return hmat;
 }
+
 std::vector<BLAST_hit>
 BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
                         const unsigned int collapse_limit) {
@@ -197,13 +202,13 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
   unsigned int length = 0;
   unsigned int nohit_length = 0;
 
-  for (unsigned int i = 0; i < seq.second.size(); i++) {
+  for (unsigned int i = 0; i < hmat.cols(); i++) {
     unsigned int j = 0;
     qstart = j;
     sstart = i;
     length = nohit_length = 0;
 
-    while (j < query_sequence.size() && j + i < seq.second.size()) {
+    while (j < hmat.rows() && j + i < hmat.cols()) {
       const bool b = hmat(j, j + i);
 
       if (b == true && length == 0) {
@@ -227,6 +232,40 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
     if (length != 0) {
       hits.push_back(BLAST_hit(qstart, sstart,
                                j - qstart - nohit_length + kmer_size - 1,
+                               db_position));
+    }
+  }
+
+  for (unsigned int i = 1; i < hmat.rows(); i++) {
+    unsigned int j = 0;
+    qstart = i;
+    sstart = j;
+    length = nohit_length = 0;
+
+    while (j < hmat.cols() && j + i < hmat.rows()) {
+      const bool b = hmat(j + i, j);
+
+      if (b == true && length == 0) {
+        qstart = j + i;
+        sstart = j;
+        nohit_length = 0;
+      }
+      length += b;
+      nohit_length += !b;
+      nohit_length *= !b;
+
+      if (nohit_length > collapse_limit && length != 0) {
+        hits.push_back(BLAST_hit(qstart, sstart,
+                                 j - sstart - nohit_length + kmer_size,
+                                 db_position));
+        nohit_length = 0;
+        length = 0;
+      }
+      j++;
+    }
+    if (length != 0) {
+      hits.push_back(BLAST_hit(qstart, sstart,
+                               j - sstart - nohit_length + kmer_size - 1,
                                db_position));
     }
   }
@@ -265,7 +304,7 @@ std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
 
   std::vector<BLAST_hit> hits =
       collapse_hits(hmat, db_position, collapse_limit);
-  extend_hits(hits);
+  extend_hits(hits); // Could be improved (see boundary alignment)
 
   return hits;
 }
@@ -276,7 +315,7 @@ void BLAST_db::blast_sequence(std::string &query) {
   auto kmers_map = extract_kmers(query);
   std::string db_seq_name = db[3].first;
   std::string db_seq = db[3].second;
-  auto hits_mat = find_hits(kmers_map, db_seq, query.size());
+  auto hits_mat = find_hits(kmers_map, 3);
   hits = get_HSP(hits_mat, 3, 3);
 
   std::cout << hits_mat << std::endl;

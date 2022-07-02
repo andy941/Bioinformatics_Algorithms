@@ -50,7 +50,7 @@ private:
   print_kmers(std::unordered_map<std::string, std::vector<unsigned int>> &mat);
   Matrix_hits
   find_hits(std::unordered_map<std::string, std::vector<unsigned int>> &mat,
-            std::string &seq, unsigned int len_db_seq);
+            const unsigned int db_position);
   std::vector<BLAST_hit> collapse_hits(Matrix_hits &hmat,
                                        const unsigned int db_position,
                                        const unsigned int collapse_limit);
