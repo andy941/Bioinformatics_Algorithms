@@ -5,6 +5,8 @@
 #include "Tools.h"
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <numeric>
 #include <ostream>
@@ -114,6 +116,9 @@ BLAST_db::BLAST_db(const std::string &filename_db,
     : kmer_size{k}, min_score(ms) {
   db = read_fasta(filename_db);
   sm = read_blosum(filename_blosum, letters);
+  for (auto &x : db) {
+    db_size += x.second.size();
+  }
 }
 
 BLAST_db::BLAST_db(const std::string &filename_db, const int match,
@@ -123,6 +128,9 @@ BLAST_db::BLAST_db(const std::string &filename_db, const int match,
   db = read_fasta(filename_db);
   sm = create_submat(match, mismatch, alphabet);
   letters = alphabet;
+  for (auto &x : db) {
+    db_size += x.second.size();
+  }
 };
 
 std::unordered_map<std::string, std::vector<unsigned int>>
@@ -274,33 +282,55 @@ BLAST_db::collapse_hits(Matrix_hits &hmat, const unsigned int db_position,
 }
 
 // Keep extending until the running value of the score dips below 0.
-void BLAST_db::extend_hits(std::vector<BLAST_hit> hits) {
-  for (auto &hit : hits) {
-    int score = match_score(query_sequence[], const std::string &s2);
-    auto &seq = db[hit.db_position];
+void BLAST_db::extend_hits(std::vector<BLAST_hit> &hits) {
+  for (BLAST_hit &hit : hits) {
+    auto &seq = db[hit.db_position].second;
+    hit.score = match_score(query_sequence.substr(hit.query_start, hit.length),
+                            seq.substr(hit.seq_start, hit.length));
+    int score = 0;
     while (hit.query_start > 0 && hit.seq_start > 0) {
       char c1 = query_sequence[hit.query_start - 1];
-      char c2 = seq.second[hit.seq_start - 1];
-      if (score += score_pos(c1, c2, sm, 0) < 0) {
+      char c2 = seq[hit.seq_start - 1];
+      int spos = score_pos(c1, c2, sm, 0);
+      score += spos;
+      if (hit.score - score < 0) {
         break;
       }
+      hit.score += spos;
       hit.query_start--;
       hit.seq_start--;
       hit.length++;
     }
     score = 0;
     while (hit.length + hit.query_start < query_sequence.length() &&
-           hit.length + hit.seq_start < seq.second.length()) {
+           hit.length + hit.seq_start < seq.length()) {
       char c1 = query_sequence[hit.query_start + hit.length];
-      char c2 = seq.second[hit.seq_start + hit.length];
-      if (score += score_pos(c1, c2, sm, 0) < 0) {
+      char c2 = seq[hit.seq_start + hit.length];
+      int spos = score_pos(c1, c2, sm, 0);
+      score += spos;
+      if (hit.score - score < 0) {
         break;
       }
+      hit.score += spos;
       hit.length++;
     }
   }
 }
-void BLAST_db::compute_Escore(BLAST_hit &hit) {}
+
+double compute_bitscore(const int score, const double lambda, const double K) {
+  return (lambda * score - log(K)) / log(2);
+}
+
+void compute_Escore(BLAST_hit &hit, double bitscore,
+                    unsigned long int db_size) {
+  hit.E_score = hit.length * db_size * pow(2, -bitscore);
+}
+
+void BLAST_db::compute_alignment(BLAST_hit &hit) {
+  hit.aln = std::move(
+      alignment(query_sequence.substr(hit.query_start, hit.length),
+                db[hit.db_position].second.substr(hit.seq_start, hit.length)));
+}
 
 std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
                                          const unsigned int db_position,
@@ -309,18 +339,47 @@ std::vector<BLAST_hit> BLAST_db::get_HSP(Matrix_hits &hmat,
   std::vector<BLAST_hit> hits =
       collapse_hits(hmat, db_position, collapse_limit);
   extend_hits(hits); // Could be improved (see boundary alignment)
+  for (auto &x : hits) {
+    compute_Escore(x, compute_bitscore(x.score, lambda, K), db_size);
+  }
 
   return hits;
 }
 
-void BLAST_db::blast_sequence(std::string &query) {
-  std::vector<BLAST_hit> hits;
-  query_sequence = query;
-  auto kmers_map = extract_kmers(query);
-  std::string db_seq_name = db[3].first;
-  std::string db_seq = db[3].second;
-  auto hits_mat = find_hits(kmers_map, 3);
-  hits = get_HSP(hits_mat, 3, 3);
+void BLAST_db::print_report(unsigned int results) {
+  for (unsigned int i = 0; i < results && i < bhits_result.size(); i++) {
+    auto &hit = bhits_result[i];
+    std::cout << std::left << std::setw(20) << "E score" << std::setw(20)
+              << hit.E_score << std::endl;
+    std::cout << std::left << std::setw(20) << "Alignment score"
+              << std::setw(20) << std::scientific << hit.score << std::endl;
+    std::cout << std::left << std::setw(20) << "Sequence ID" << std::setw(20)
+              << db[hit.db_position].first << std::endl;
+    std::cout << std::endl;
+    std::cout << "Ungapped Alignment:" << std::endl;
+    hit.aln.print(80);
+    std::cout << std::endl;
+  }
+}
 
-  std::cout << hits_mat << std::endl;
+void BLAST_db::blast_sequence(std::string &query, double Escore_limit) {
+  Escore_limit = Escore_limit;
+  bhits_result = {};
+  for (unsigned int i = 0; i < db.size(); i++) {
+    std::vector<BLAST_hit> hits;
+    query_sequence = query;
+    auto kmers_map = extract_kmers(query);
+    auto hits_mat = find_hits(kmers_map, i);
+    hits = get_HSP(hits_mat, i, kmer_size);
+    for (auto &x : hits) {
+      if (x.E_score < Escore_limit) {
+        compute_alignment(x);
+        bhits_result.push_back(x);
+      }
+    }
+  }
+  std::sort(bhits_result.begin(), bhits_result.end(),
+            [](const BLAST_hit &a, const BLAST_hit &b) {
+              return a.E_score < b.E_score;
+            });
 }
