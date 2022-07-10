@@ -77,3 +77,6 @@ install(
 )
 
 # Chapter 08 ------------------------------------------------------------------
+add_executable(MSA.o "${CMAKE_SOURCE_DIR}/src/08_MultipleSequenceAlignment/MSA.cpp")
+target_link_libraries(MSA.o lib_08_MultipleSequenceAlignment)
+install(TARGETS MSA.o DESTINATION "${CMAKE_SOURCE_DIR}/src/08_MultipleSequenceAlignment/")
