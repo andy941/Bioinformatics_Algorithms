@@ -31,4 +31,8 @@ target_include_directories(
 # Chapter 08 ------------------------------------------------------------------
 add_library(lib_08_MultipleSequenceAlignment "08_MultipleSequenceAlignment.cpp")
 target_link_libraries(lib_08_MultipleSequenceAlignment lib_06_SequenceAlignment)
-target_include_directories(lib_08_MultipleSequenceAlignment PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(
+  lib_08_MultipleSequenceAlignment PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/ext/Eigen/"
+)
