@@ -19,7 +19,7 @@ struct multiple_alignment {
   void print();
 };
 
-class MSA {
+class msa {
   std::vector<std::pair<std::string, std::string>> m_seq;
   multiple_alignment m_aln{};
   std::unordered_map<std::string, int> sm;
@@ -27,8 +27,8 @@ class MSA {
   int gap_cost;
 
 public:
-  MSA(const int &match, const int &mismatch, const std::string &alphabet);
-  MSA(const std::string &file);
+  msa(const int match, const int mismatch, const std::string &alphabet);
+  msa(const std::string &file);
 
 public:
   void align_sequences(const std::vector<std::pair<std::string, std::string>> &,
@@ -36,7 +36,7 @@ public:
 };
 
 similarity_matrix
-upgma_matrix(const std::vector<std::pair<std::string, std::string>> &);
+pairwise_aln_scores(const std::vector<std::pair<std::string, std::string>> &);
 
 std::vector<int> upgma_order(similarity_matrix &);
 
