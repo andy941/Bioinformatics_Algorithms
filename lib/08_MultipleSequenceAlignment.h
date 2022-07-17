@@ -9,12 +9,16 @@ namespace MSA {
 
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> similarity_matrix;
 
+int sum_of_pairs(const std::string &str,
+                 std::unordered_map<std::string, int> &sm, const int gap_cost);
+
 struct multiple_alignment {
-  std::vector<std::pair<std::string, std::string>> alignments{};
+  std::vector<std::string> aln_pos{};
+  std::vector<std::string> seq_names{};
   int score{0};
 
   multiple_alignment() = default;
-  int get_score();
+  int get_score(std::unordered_map<std::string, int> &sm, const int gap_cost);
   std::string get_consensus();
   void print();
 };

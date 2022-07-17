@@ -198,6 +198,8 @@ std::unordered_map<std::string, int> read_submat(const std::string &file) {
 
 int score_pos(const char c1, const char c2,
               std::unordered_map<std::string, int> &sm, const int &gap_cost) {
+  if (c1 == '-' && c2 == '-')
+    return 0;
   if (c1 == '-' || c2 == '-')
     return gap_cost;
   std::string s{c1};

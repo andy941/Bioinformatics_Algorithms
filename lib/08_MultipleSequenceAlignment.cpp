@@ -2,19 +2,42 @@
 #include "06_SequenceAlignment.h"
 #include "07_DatabaseSearch.h"
 
-int MSA::multiple_alignment::get_score() {
+int MSA::sum_of_pairs(const std::string &str,
+                      std::unordered_map<std::string, int> &sm,
+                      const int gap_cost) {
   int score = 0;
-  if (alignments.empty())
-    return 0;
-  for (unsigned int i = 0; i < alignments[0].second.size(); i++) {
-    for (auto &seq : alignments) {
-
-      seq.second[i];
+  for (unsigned int i = 0; i < str.size() - 1; i++) {
+    for (unsigned int j = i + 1; j < str.size(); j++) {
+      score += score_pos(str[i], str[j], sm, gap_cost);
     }
   }
+  return score;
 };
-std::string MSA::multiple_alignment::get_consensus();
-void MSA::multiple_alignment::print();
+
+int MSA::multiple_alignment::get_score(std::unordered_map<std::string, int> &sm,
+                                       const int gap_cost) {
+  int score = 0;
+  if (aln_pos.empty())
+    return 0;
+  for (auto &x : aln_pos) {
+    score += sum_of_pairs(x, sm, gap_cost);
+  }
+  return score;
+};
+
+std::string MSA::multiple_alignment::get_consensus() {
+  std::string cons_aln{};
+  std::vector<std::pair<std::string, unsigned int>> letter_count{};
+  if (aln_pos.empty())
+    return cons_aln;
+  cons_aln.reserve(aln_pos.size());
+  for (auto &x : aln_pos) {
+    find()
+  }
+  return cons_aln;
+};
+
+void MSA::multiple_alignment::print(){};
 
 MSA::msa::msa(const int match, const int mismatch, const std::string &alphabet)
     : nw{match, mismatch, alphabet} {
