@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace MSA {
+namespace msa {
 
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> similarity_matrix;
 
@@ -18,9 +18,10 @@ struct multiple_alignment {
   int score{0};
 
   multiple_alignment() = default;
+  void add_sequence(std::string &name, std::string &seq);
   int get_score(std::unordered_map<std::string, int> &sm, const int gap_cost);
   std::string get_consensus();
-  void print();
+  void print(size_t line_size = 100);
 };
 
 class msa {
@@ -28,7 +29,7 @@ class msa {
   multiple_alignment m_aln{};
   std::unordered_map<std::string, int> sm;
   needleman_Wunsch nw;
-  int gap_cost;
+  int gap_cost{-8};
 
 public:
   msa(const int match, const int mismatch, const std::string &alphabet);
@@ -44,4 +45,4 @@ pairwise_aln_scores(const std::vector<std::pair<std::string, std::string>> &);
 
 std::vector<int> upgma_order(similarity_matrix &);
 
-} // namespace MSA
+} // namespace msa
