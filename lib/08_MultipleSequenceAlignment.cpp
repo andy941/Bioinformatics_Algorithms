@@ -108,4 +108,6 @@ void msa::msa::align_sequences(
   for (auto &seq : sequences) {
     m_aln.add_sequence(seq.first, seq.second);
   }
+  std::cout << m_aln.get_consensus() << std::endl;
+  std::cout << m_aln.get_score(sm, gap_cost) << std::endl;
 }
