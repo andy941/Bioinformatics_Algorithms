@@ -18,18 +18,17 @@ struct multiple_alignment {
   int score{0};
 
   multiple_alignment() = default;
-  void add_sequence(std::string &name, std::string &seq);
+  void add_sequence(const std::string &name, const std::string &seq);
   int get_score(std::unordered_map<std::string, int> &sm, const int gap_cost);
   std::string get_consensus();
-  void print(size_t line_size = 100);
+  void print(size_t line_size = 80);
 };
 
 class msa {
-  std::vector<std::pair<std::string, std::string>> m_seq;
   multiple_alignment m_aln{};
   std::unordered_map<std::string, int> sm;
   needleman_Wunsch nw;
-  int gap_cost{-8};
+  int gap_cost{0};
 
 public:
   msa(const int match, const int mismatch, const std::string &alphabet);
@@ -37,7 +36,8 @@ public:
 
 public:
   void align_sequences(const std::vector<std::pair<std::string, std::string>> &,
-                       const int gap_cost);
+                       int gap_cost);
+  void print(size_t line_size = 80);
 };
 
 similarity_matrix
