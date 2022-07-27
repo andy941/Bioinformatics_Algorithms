@@ -29,7 +29,11 @@ target_include_directories(lib_06_SequenceAlignment PUBLIC "${CMAKE_CURRENT_SOUR
 #)
 
 # Chapter 08 ------------------------------------------------------------------
-add_library(lib_08_MultipleSequenceAlignment "08_MultipleSequenceAlignment.cpp")
+add_library(
+  lib_08_MultipleSequenceAlignment
+  "08_MultipleSequenceAlignment.cpp"
+  "08_MultipleAlignmentClass.cpp"
+)
 target_link_libraries(lib_08_MultipleSequenceAlignment lib_06_SequenceAlignment)
 target_include_directories(
   lib_08_MultipleSequenceAlignment PUBLIC
