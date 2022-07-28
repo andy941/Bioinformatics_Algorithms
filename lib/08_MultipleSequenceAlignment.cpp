@@ -14,8 +14,23 @@ msa::msa::msa(const int match, const int mismatch, const std::string &alphabet)
 };
 msa::msa::msa(const std::string &file) : nw{file} { sm = read_submat(file); };
 
-void msa::msa::align_sequences(
-    const std::vector<std::pair<std::string, std::string>> &sequences,
+msa::similarity_matrix msa::pairwise_aln_scores(
+    const std::vector<std::pair<std::string, std::string>> &seqs,
+    needleman_Wunsch &nw, int gap_cost) {
+  similarity_matrix sim_mat;
+  sim_mat = similarity_matrix::Zero(seqs.size(), seqs.size());
+  for (size_t i = 0; i < seqs.size(); i++) {
+    for (size_t j = i + 1; j < seqs.size(); j++) {
+			nw.align_sequences(seqs[i].second, seqs[j].second, gap_cost);
+			nw.trace_back();
+			nw.print();
+      sim_mat(j, i) = nw.get_score();
+    }
+  }
+	return sim_mat;
+}
+
+void msa::msa::align_sequences(const std::vector<std::pair<std::string, std::string>> &sequences,
     int gap_cost) {
   gap_cost = gap_cost;
   for (auto &seq : sequences) {
@@ -23,4 +38,7 @@ void msa::msa::align_sequences(
   }
   std::cout << m_aln.get_consensus() << std::endl;
   std::cout << m_aln.get_score(sm, gap_cost) << std::endl;
+	//auto sim_mat = pairwise_aln_scores(sequences,nw,gap_cost);
+	//std::cout << sim_mat << std::endl;
 }
+
