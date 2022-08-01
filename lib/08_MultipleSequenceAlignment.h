@@ -28,8 +28,7 @@ public:
 };
 
 similarity_matrix pairwise_aln_scores(
-    const std::vector<std::pair<std::string, std::string>> &seqs,
-    needleman_Wunsch &nw, int gap_cost);
+    const std::vector<std::pair<std::string, std::string>> &seqs);
 
 std::vector<int> upgma_order(similarity_matrix &);
 
