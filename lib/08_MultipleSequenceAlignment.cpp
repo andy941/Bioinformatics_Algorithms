@@ -21,24 +21,17 @@ msa::similarity_matrix msa::pairwise_aln_scores(
   sim_mat = similarity_matrix::Zero(seqs.size(), seqs.size());
   for (size_t i = 0; i < seqs.size(); i++) {
     for (size_t j = i + 1; j < seqs.size(); j++) {
-			nw.align_sequences(seqs[i].second, seqs[j].second, gap_cost);
-			nw.trace_back();
-			nw.print();
+      nw.align_sequences(seqs[i].second, seqs[j].second, gap_cost);
+      nw.trace_back();
+      nw.print();
       sim_mat(j, i) = nw.get_score();
     }
   }
-	return sim_mat;
+  return sim_mat;
 }
 
-void msa::msa::align_sequences(const std::vector<std::pair<std::string, std::string>> &sequences,
+void msa::msa::align_sequences(
+    const std::vector<std::pair<std::string, std::string>> &sequences,
     int gap_cost) {
   gap_cost = gap_cost;
-  for (auto &seq : sequences) {
-    m_aln.add_sequence(seq.first, seq.second);
-  }
-  std::cout << m_aln.get_consensus() << std::endl;
-  std::cout << m_aln.get_score(sm, gap_cost) << std::endl;
-	//auto sim_mat = pairwise_aln_scores(sequences,nw,gap_cost);
-	//std::cout << sim_mat << std::endl;
 }
-
