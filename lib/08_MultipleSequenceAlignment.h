@@ -3,6 +3,7 @@
 #include "06_SequenceAlignment.h"
 #include "08_MultipleAlignmentClass.h"
 #include <Eigen/Core>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,9 @@ public:
 similarity_matrix pairwise_aln_scores(
     const std::vector<std::pair<std::string, std::string>> &seqs);
 
-std::vector<int> upgma_order(similarity_matrix &);
+std::array<size_t, 2> upgma_min(similarity_matrix &sim_mat);
+void upgma_reduce(similarity_matrix *sim_mat, similarity_matrix *condensed_mat,
+                  std::array<size_t, 2> &rowcol, std::list<size_t> &labels);
+std::vector<size_t> upgma_order(similarity_matrix);
 
 } // namespace msa
